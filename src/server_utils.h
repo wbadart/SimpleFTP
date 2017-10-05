@@ -12,14 +12,16 @@
 
 #pragma once
 
-#include <cstdarg>   // va_list
-#include <cstdlib>   // atoi, exit
-#include <cstring>   // strncmp
-#include <iostream>  // cout
+#include <cstdarg>      // va_list
+#include <cstdlib>      // atoi, exit
+#include <cstring>      // strncmp
+#include <iostream>     // cout
+#include <sys/socket.h> // bind, socket
 
+#define DEFAULT_PROTOCOL (0)
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 
-extern int LOG_LVL;
+static int LOG_LVL = 0;
 
 
 // Print the usage message and return status

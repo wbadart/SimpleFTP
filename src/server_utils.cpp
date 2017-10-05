@@ -53,8 +53,10 @@ void parse_args(int argc, char *argv[], int &port) {
     if(argc < 2) error(
         "Missing arguments. See %s -h for usage.",
         argv[0]);
-    if(streq(argv[1], "-h") || streq(argv[1], "--help"))
+    if(streq(argv[1], "-h") || streq(argv[1], "--help")) {
         usage();
+        exit(EXIT_SUCCESS);
+    }
     if(streq(argv[1], "-v")) {
         LOG_LVL = 1;
         argv++;
