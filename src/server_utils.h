@@ -23,8 +23,5 @@
 // Print the usage message and return status
 int usage(int status=EXIT_SUCCESS);
 
-// Report error and exit with status
-void error(char *fmt, ...);
-
 // Parse command line args and populate options
 void parse_args(int argc, char *argv[], int &port);

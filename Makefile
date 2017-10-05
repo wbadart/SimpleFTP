@@ -19,10 +19,10 @@ LD_FLAGS  =
 
 all: client server
 
-client: src/client.o src/client_utils.o
+client: src/client.o src/client_utils.o src/utils.o
 	$(LD) $(LD_FLAGS) $^ -o myftp
 
-server: src/server.o src/server_utils.o
+server: src/server.o src/server_utils.o src/utils.o
 	$(LD) $(LD_FLAGS) $^ -o myftpd
 
 %.o: %.cpp

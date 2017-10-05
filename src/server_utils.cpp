@@ -21,19 +21,6 @@ int usage(int status) {
 }
 
 
-void error(char *fmt, ...) {
-    va_list args;
-    char msg[BUFSIZ];
-
-    va_start(args, fmt);
-    vsprintf(msg, fmt, args);
-    va_end(args);
-
-    perror(msg);
-    exit(EXIT_FAILURE);
-}
-
-
 void parse_args(int argc, char *argv[], int &port) {
     if(argc < 2) error(
         "Missing arguments. See %s -h for usage.",

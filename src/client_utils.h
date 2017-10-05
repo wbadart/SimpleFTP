@@ -13,6 +13,6 @@
 #pragma once
 
 #include <iostream>
-
+#include <string.h>
 
 int usage(int status=0);
