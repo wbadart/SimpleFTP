@@ -14,16 +14,14 @@
 
 
 int main(int argc, char *argv[]) {
+
+    // Parse and report command line opts
     int PORT = 0;
     parse_args(argc, argv, PORT);
     log("Using port '%d'", PORT);
 
-    int listen_sockfd = socket(
-        AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
-    if(listen_sockfd < 0)
-        error("Unable to get listen socket");
-    if(bind(listen_sockfd, (struct sockaddr*)s, (socklen_t)l) < 0)
-        error("Unable to bind on port %d", PORT);
+    // Get listening socket
+    int listen_sockfd = get_socket(PORT);
 
     return EXIT_SUCCESS;
 }

@@ -10,7 +10,6 @@
  * created: OCT 2017
  **/
 
-#include "utils.h"
 #include "server_utils.h"
 
 
@@ -39,4 +38,33 @@ void parse_args(int argc, char *argv[], int &port) {
     port = atoi(argv[1]);
     if(port == 0)
         error("PORT must be a valid, positive integer.");
+}
+
+
+int get_socket(const int port) {
+    int fd = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
+    if(fd < 0) error("Unable to get socket descriptor");
+
+    // Enable address reuse
+    int opt = 1;
+    if(setsockopt(
+            fd,
+            SOL_SOCKET,
+            SO_REUSEADDR,
+            (char*)&opt,
+            sizeof(int)) < 0)
+        error("Unable to enable address reuse");
+
+    // Establish socket address for bind
+    struct sockaddr_in sin;
+    bzero(&sin, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(port);
+    sin.sin_addr.s_addr = INADDR_ANY;
+
+    if(bind(fd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
+        error("Unable to bind to port %d", port);
+    log("Bind to port %d successful", port);
+
+    return fd;
 }

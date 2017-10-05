@@ -15,7 +15,9 @@
 #include <cstdlib>      // atoi, exit
 #include <cstring>      // strncmp
 #include <iostream>     // cout
+#include <netdb.h>      // sockaddr_in
 #include <sys/socket.h> // bind, socket
+#include "utils.h"      // error, log
 
 #define DEFAULT_PROTOCOL (0)
 
@@ -24,3 +26,6 @@ int usage(int status=EXIT_SUCCESS);
 
 // Parse command line args and populate options
 void parse_args(int argc, char *argv[], int &port);
+
+// Encapulate socket setup operations
+int get_socket(const int port);
