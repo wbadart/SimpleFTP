@@ -16,6 +16,10 @@
 #include <cstdlib>  // exit
 #include <cstdarg>  // va_list
 
+#define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
+
+extern int LOG_LVL;
+
 // Report error and exit with status
 void error(char *fmt, ...);
 

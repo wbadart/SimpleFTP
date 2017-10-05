@@ -17,11 +17,6 @@
 #include <cstring>   // strncmp
 #include <iostream>  // cout
 
-#define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
-
-extern int LOG_LVL;
-
-
 // Print the usage message and return status
 int usage(int status=EXIT_SUCCESS);
 
