@@ -21,34 +21,6 @@ int usage(int status) {
     return status;
 }
 
-
-void error(char *fmt, ...) {
-    va_list args;
-    char msg[BUFSIZ];
-
-    va_start(args, fmt);
-    vsprintf(msg, fmt, args);
-    va_end(args);
-
-    perror(msg);
-    exit(EXIT_FAILURE);
-}
-
-
-void log(char *fmt, ...) {
-    if(LOG_LVL < 1) return;
-    va_list args;
-    char msg[BUFSIZ];
-    strcat(msg, "DEBUG: ");
-
-    va_start(args, fmt);
-    vsprintf(msg+strlen("DEBUG: "), fmt, args);
-    va_end(args);
-
-    std::cerr << msg << std::endl;
-}
-
-
 void parse_args(int argc, char *argv[], int &port) {
     if(argc < 2) error(
         "Missing arguments. See %s -h for usage.",
