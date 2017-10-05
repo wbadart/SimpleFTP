@@ -12,9 +12,15 @@
 
 #pragma once
 
-#include <iostream> // cout
 #include <cstdlib>  // exit
 #include <cstdarg>  // va_list
+#include <cstring>  // strcmp
+#include <iostream> // cout
+
+#define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
+
+// Default log level (i.e. disabled)
+inline int LOG_LVL = 0;
 
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 

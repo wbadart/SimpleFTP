@@ -12,7 +12,7 @@
 ##
 
 CXX       = g++
-CXX_FLAGS = -ggdb -Wall -O0
+CXX_FLAGS = -ggdb -Wall -O0 -std=gnu++11
 LD        = g++
 LD_FLAGS  =
 

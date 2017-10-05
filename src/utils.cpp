@@ -12,6 +12,7 @@
 
 #include "utils.h"
 
+
 void error(char *fmt, ...) {
     va_list args;
     char msg[BUFSIZ];
@@ -24,14 +25,15 @@ void error(char *fmt, ...) {
     exit(EXIT_FAILURE);
 }
 
+
 void log(char *fmt, ...) {
     if(LOG_LVL < 1) return;
     va_list args;
-    char msg[BUFSIZ];
-    strcat(msg, "DEBUG: ");
+    char msg[BUFSIZ], *prefix = "DEBUG: ";
+    strcpy(msg, prefix);
 
     va_start(args, fmt);
-    vsprintf(msg+strlen("DEBUG: "), fmt, args);
+    vsprintf(msg+strlen(prefix), fmt, args);
     va_end(args);
 
     std::cerr << msg << std::endl;

@@ -14,8 +14,14 @@
 
 
 int main(int argc, char *argv[]) {
+
+    // Parse and report command line opts
     int PORT = 0;
     parse_args(argc, argv, PORT);
+    log("Using port '%d'", PORT);
 
-    std::cout << PORT << std::endl;
+    // Get listening socket
+    int listen_sockfd = get_socket(PORT);
+
+    return EXIT_SUCCESS;
 }
