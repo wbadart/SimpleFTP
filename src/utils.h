@@ -20,7 +20,7 @@
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 
 // Default log level (i.e. disabled)
-static int LOG_LVL = 0;
+inline int LOG_LVL = 0;
 
 // Report error and exit with status
 void error(char *fmt, ...);

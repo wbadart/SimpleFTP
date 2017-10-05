@@ -30,7 +30,7 @@ void log(char *fmt, ...) {
     if(LOG_LVL < 1) return;
     va_list args;
     char msg[BUFSIZ], *prefix = "DEBUG: ";
-    strcat(msg, prefix);
+    strcpy(msg, prefix);
 
     va_start(args, fmt);
     vsprintf(msg+strlen(prefix), fmt, args);
