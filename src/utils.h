@@ -17,6 +17,8 @@
 #include <cstring>  // strcmp
 #include <iostream> // cout
 
+#define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
+
 // Default log level (i.e. disabled)
 static int LOG_LVL = 0;
 

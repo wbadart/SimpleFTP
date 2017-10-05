@@ -18,10 +18,6 @@
 #include <sys/socket.h> // bind, socket
 
 #define DEFAULT_PROTOCOL (0)
-#define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
-
-static int LOG_LVL = 0;
-
 
 // Print the usage message and return status
 int usage(int status=EXIT_SUCCESS);
