@@ -23,3 +23,16 @@ void error(char *fmt, ...) {
     perror(msg);
     exit(EXIT_FAILURE);
 }
+
+void log(char *fmt, ...) {
+    if(LOG_LVL < 1) return;
+    va_list args;
+    char msg[BUFSIZ];
+    strcat(msg, "DEBUG: ");
+
+    va_start(args, fmt);
+    vsprintf(msg+strlen("DEBUG: "), fmt, args);
+    va_end(args);
+
+    std::cerr << msg << std::endl;
+}

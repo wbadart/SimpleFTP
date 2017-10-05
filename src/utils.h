@@ -18,3 +18,6 @@
 
 // Report error and exit with status
 void error(char *fmt, ...);
+
+// Conditionally report debugging messages
+void log(char *fmt, ...);
