@@ -10,6 +10,7 @@
  * created: OCT 2017
  **/
 
+#include "utils.h"
 #include "server_utils.h"
 
 
@@ -20,6 +21,7 @@ int usage(int status) {
         << "    PORT    Port on which to listen for incoming connections.\n";
     return status;
 }
+
 
 void parse_args(int argc, char *argv[], int &port) {
     if(argc < 2) error(

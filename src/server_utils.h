@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include <cstdarg>      // va_list
 #include <cstdlib>      // atoi, exit
 #include <cstring>      // strncmp
 #include <iostream>     // cout

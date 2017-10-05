@@ -12,9 +12,13 @@
 
 #pragma once
 
-#include <iostream> // cout
 #include <cstdlib>  // exit
 #include <cstdarg>  // va_list
+#include <cstring>  // strcmp
+#include <iostream> // cout
+
+// Default log level (i.e. disabled)
+static int LOG_LVL = 0;
 
 // Report error and exit with status
 void error(char *fmt, ...);
