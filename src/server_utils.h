@@ -27,5 +27,5 @@ int usage(int status=EXIT_SUCCESS);
 // Parse command line args and populate options
 void parse_args(int argc, char *argv[], int &port);
 
-// Encapulate socket setup operations
+// Encapsulate socket setup operations
 int get_socket(const int port);
