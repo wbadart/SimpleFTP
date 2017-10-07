@@ -15,10 +15,11 @@
 
 void error(char *fmt, ...) {
     va_list args;
-    char msg[BUFSIZ];
+    char msg[BUFSIZ], *prefix = "ERROR: ";
+    strcpy(msg, prefix);
 
     va_start(args, fmt);
-    vsprintf(msg, fmt, args);
+    vsprintf(msg+strlen(prefix), fmt, args);
     va_end(args);
 
     perror(msg);
