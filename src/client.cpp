@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
 		error("Error: Host cannot be found\n");
 	}
 
+	// buffer for sending and receiving messages
 	char msg_buffer[BUFSIZ];
 	bzero(msg_buffer, BUFSIZ);
 
@@ -53,15 +54,14 @@ int main(int argc, char *argv[]) {
 	if (connect(socket_fd, (struct sockaddr*) &sin, sizeof(sin)) < 0) {
 		error("Error: Failed to connect to server\n");
 	}
+	printf(">>>");
 
 	while (fgets(msg_buffer, BUFSIZ, stdin)) {
 		// check if they entered QUIT, if so then leave the program
-		if (streq(msg_buffer, "QUIT")) {
+		if (streq(msg_buffer, "QUIT\n")) {
 			printf("Goodbye!\n");
 			break;
 		}
-		// clear buffer
-		bzero(msg_buffer, BUFSIZ);
 
 		// TODO: check for commands and give buffer the needed info
 
@@ -71,9 +71,14 @@ int main(int argc, char *argv[]) {
 		}
 
 		// get server's response
-		if (recv(socket_fd, msg_buffer, strlen(msg_buffer), 0) == -1) {
+		if (recv(socket_fd, msg_buffer, BUFSIZ, 0) == -1) {
 			error("Error: Client failed to receive message\n");
 		}
+		printf("%s", msg_buffer);
+
+		printf(">>>");
+		// clear buffer
+		bzero(msg_buffer, BUFSIZ);
 	}
 
 	close(socket_fd);
