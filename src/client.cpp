@@ -20,7 +20,6 @@
 
 #define MAX_MSG 256
 
-
 int main(int argc, char *argv[]) {
 	// check for correct number of args
 	if (argc != 3) {
@@ -31,12 +30,15 @@ int main(int argc, char *argv[]) {
 	struct hostent* hp;
 	hp = gethostbyname(argv[1]);
 	if (!hp) {
-		error("Error: Host cannot be found\n");
+		error("Host cannot be found\n");
 	}
 
 	// buffer for sending and receiving messages
 	char msg_buffer[BUFSIZ];
 	bzero(msg_buffer, BUFSIZ);
+
+	char const prompt[] = ">>> ";
+	int state = 0;
 
 	int socket_fd;
 	struct sockaddr_in sin;
@@ -47,36 +49,68 @@ int main(int argc, char *argv[]) {
 
 	// create socket
 	if ((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		error("Error: Failed to create socket\n");
+		error("Failed to create socket\n");
 	}
 
 	// connect()
 	if (connect(socket_fd, (struct sockaddr*) &sin, sizeof(sin)) < 0) {
-		error("Error: Failed to connect to server\n");
+		error("Failed to connect to server\n");
 	}
-	printf(">>>");
+	printf("%s", prompt);
 
 	while (fgets(msg_buffer, BUFSIZ, stdin)) {
-		// check if they entered QUIT, if so then leave the program
-		if (streq(msg_buffer, "QUIT\n")) {
+		// check the command and do respective action(s)
+		if (streq(msg_buffer, "DWLD\n")) {
+
+		} else if (streq(msg_buffer, "UPLD\n")) {
+			state = 1;
+		} else if (streq(msg_buffer, "LIST\n")) {
+			state = 2;
+		} else if (streq(msg_buffer, "MDIR\n")) {
+			state = 3;
+		} else if (streq(msg_buffer, "RDIR\n")) {
+			state = 4;
+		} else if (streq(msg_buffer, "CDIR\n")) {
+			state = 5;
+		} else if (streq(msg_buffer, "DELF\n")) {
+			state = 6;
+		} else if (streq(msg_buffer, "QUIT\n")) {
 			printf("Goodbye!\n");
-			break;
+			break;			
+		} else {
+			printf("Unknown command\n");
+			continue;
 		}
-
-		// TODO: check for commands and give buffer the needed info
-
+ 
 		// send message to server
 		if (send(socket_fd, msg_buffer, strlen(msg_buffer), 0) == -1) {
-			error("Error: Client failed to send message\n");
+			error("Client failed to send message\n");
 		}
 
 		// get server's response
 		if (recv(socket_fd, msg_buffer, BUFSIZ, 0) == -1) {
-			error("Error: Client failed to receive message\n");
+			error("Client failed to receive message\n");
 		}
-		printf("%s", msg_buffer);
 
-		printf(">>>");
+		// handle the result based on what command they initially entered
+		switch (state) {
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			case 5:
+				break;
+			case 6:
+				break;
+			default:
+				error("Could not properly handle response\n");
+		}
+
+		printf("%s", prompt);
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
 	}
