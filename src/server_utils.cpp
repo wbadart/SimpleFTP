@@ -70,3 +70,19 @@ int get_socket(const int port, struct sockaddr_in &sin) {
 
     return fd;
 }
+
+
+int accept_client(
+        const int listen_fd,
+        const struct sockaddr_in &addr) {
+    socklen_t len = sizeof(addr);
+    int client_sockfd = accept(
+        listen_fd, (struct sockaddr*)&addr, &len);
+    if(client_sockfd < 0) error("Accept failed");
+    return client_sockfd;
+}
+
+
+void dispatch_command(const char *msg, char *response) {
+    strcpy(response, "Hello there!\n");
+}

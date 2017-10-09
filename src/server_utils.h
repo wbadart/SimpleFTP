@@ -31,3 +31,10 @@ void parse_args(int argc, char *argv[], int &port);
 
 // Encapsulate socket setup operations
 int get_socket(const int port, struct sockaddr_in&);
+
+// Perform `accept' and handle errors
+int accept_client(
+    const int listen_fd, const struct sockaddr_in &addr);
+
+// Inspect client message, perform specified command, and set response
+void dispatch_command(const char *msg, char *response);

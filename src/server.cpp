@@ -25,20 +25,25 @@ int main(int argc, char *argv[]) {
     int listen_sockfd = get_socket(PORT, me);
 
     while(true) {
-        // Get client
-        int client_sockfd = accept(
-            listen_sockfd, (struct sockaddr*)&me, &len);
-        if(client_sockfd < 0) error("Accept failed");
 
-        // Get messages
-        char msg[BUFSIZ]; int msg_len = 0;
-        while((msg_len = read(client_sockfd, msg, sizeof(msg))) > 0) {
+        // Get client
+        int client_fd = accept_client(listen_sockfd, me);
+
+        // Read messages
+        char msg[BUFSIZ], response[BUFSIZ]; int msg_len = 0;
+        while((msg_len = read(client_fd, msg, sizeof(msg))) > 0) {
             log("client message: >>%s<<", msg);
+            // Inspect `msg' and run command. Sets `response'
+            dispatch_command(msg, response);
+            // Send response string
+            if(write(client_fd, response, strlen(response)) < 0)
+                error("Unable to send response '%s'", response);
         }
 
         // Handle client finishing
         if(msg_len == 0) log("Client done");
-        else if(msg_len == -1) error("Read error on client socket");
+        else if(msg_len == -1)
+            error("Read error on client socket");
     }
 
     return EXIT_SUCCESS;
