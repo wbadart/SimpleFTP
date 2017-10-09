@@ -64,7 +64,11 @@ int main(int argc, char *argv[]) {
 		if (CMD_LABELS.count(cmd) > 0) {
 			switch (CMD_LABELS.at(cmd)) {
 				case Command::DWLD:
-					// cmd_dwld()
+					// get name of file to be downloaded
+					fgets(dir_name, BUFSIZ, stdin);
+					name = strip(dir_name);
+					cmd_dwld(socket_fd, name);
+					bzero(dir_name, BUFSIZ);
 					break;
 
 				case Command::UPLD:
@@ -72,7 +76,11 @@ int main(int argc, char *argv[]) {
 					break;
 
 				case Command::DELF:
-					// cmd_delf()
+					// get name of file to be deleted
+					fgets(dir_name, BUFSIZ, stdin);
+					name = strip(dir_name);
+					cmd_mdir(socket_fd, name);
+					bzero(dir_name, BUFSIZ);
 					break;
 
 				case Command::LIST:
@@ -80,6 +88,7 @@ int main(int argc, char *argv[]) {
 					break;
 
 				case Command::MDIR:
+					// get name of directory to be made
 					fgets(dir_name, BUFSIZ, stdin);
 					name = strip(dir_name);
 					cmd_mdir(socket_fd, name);
@@ -87,6 +96,7 @@ int main(int argc, char *argv[]) {
 					break;
 
 				case Command::RDIR:
+					// get name of directory to delete
 					fgets(dir_name, BUFSIZ, stdin);
 					name = strip(dir_name);
 					cmd_rdir(socket_fd, name);
@@ -94,6 +104,7 @@ int main(int argc, char *argv[]) {
 					break;
 
 				case Command::CDIR:
+					// get name of directory to change to
 					fgets(dir_name, BUFSIZ, stdin);
 					name = strip(dir_name);
 					cmd_cdir(socket_fd, name);

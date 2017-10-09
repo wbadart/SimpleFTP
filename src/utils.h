@@ -18,6 +18,8 @@
 #include <cstdarg>      // va_list
 #include <cstring>      // strcmp
 #include <iostream>     // cout
+#include <stdio.h>      // fseek, fopen
+#include <sys/stat.h>   // stat
 #include <map>
 #include <string>
 #include <sys/socket.h> // socket, connect, send, recv
