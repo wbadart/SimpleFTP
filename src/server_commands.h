@@ -12,13 +12,18 @@
 
 #pragma once
 
-#include <cstdio>
+#include <cstring>  // strlen
+#include <dirent.h> // opendir
 #include <string>
+#include <unistd.h> // write
 
-void cmd_dwld(char *response, std::string fname);
-void cmd_upld(char *response, std::string fname);
-void cmd_delf(char *response, std::string fname);
-void cmd_list(char *response);
-void cmd_mdir(char *response, std::string fname);
-void cmd_rdir(char *response, std::string fname);
-void cmd_cdir(char *response, std::string fname);
+#include "server_utils.h"
+#include "utils.h"
+
+void cmd_dwld(int client_fd, std::string fname);
+void cmd_upld(int client_fd, std::string fname);
+void cmd_delf(int client_fd, std::string fname);
+void cmd_list(int client_fd);
+void cmd_mdir(int client_fd, std::string fname);
+void cmd_rdir(int client_fd, std::string fname);
+void cmd_cdir(int client_fd, std::string fname);

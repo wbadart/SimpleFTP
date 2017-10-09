@@ -12,9 +12,9 @@
 ##
 
 CXX       = g++
-CXX_FLAGS = -ggdb -Wall -O0 -std=gnu++11
+CXX_FLAGS = -ggdb -O0 -std=gnu++11
 LD        = g++
-LD_FLAGS  =
+LD_FLAGS  = -static-libstdc++
 
 
 all: client server

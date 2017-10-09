@@ -12,6 +12,8 @@
 
 #include "server_utils.h"
 
+int LOG_LVL;
+
 
 int usage(int status) {
     std::cout
@@ -84,7 +86,7 @@ int accept_client(
 }
 
 
-bool dispatch_command(const char *msg, char *response) {
+bool dispatch_command(const int client_fd, const char *msg) {
     std::string msg_str, cmd_str, fname;
     std::stringstream msg_ss;
     msg_ss << msg;
@@ -92,7 +94,7 @@ bool dispatch_command(const char *msg, char *response) {
     // Isolate command
     msg_ss >> cmd_str;
     str2lower(cmd_str);
-    log("Dispatching command '%s'", cmd_str);
+    log("Dispatching command '%s'", cmd_str.c_str());
 
     // Get argument file/ directory name
     std::getline(msg_ss, fname);
@@ -102,34 +104,33 @@ bool dispatch_command(const char *msg, char *response) {
     if(CMD_LABELS.count(cmd_str) > 0) {
         switch(CMD_LABELS.at(cmd_str)) {
             case Command::DWLD:
-                cmd_dwld(response, fname);
+                cmd_dwld(client_fd, fname);
                 break;
             case Command::UPLD:
-                cmd_upld(response, fname);
+                cmd_upld(client_fd, fname);
                 break;
             case Command::DELF:
-                cmd_delf(response, fname);
+                cmd_delf(client_fd, fname);
                 break;
             case Command::LIST:
-                cmd_list(response);
+                cmd_list(client_fd);
                 break;
             case Command::MDIR:
-                cmd_mdir(response, fname);
+                cmd_mdir(client_fd, fname);
                 break;
             case Command::RDIR:
-                cmd_rdir(response, fname);
+                cmd_rdir(client_fd, fname);
                 break;
             case Command::CDIR:
-                cmd_cdir(response, fname);
+                cmd_cdir(client_fd, fname);
                 break;
             case Command::QUIT:
                 quit = true;
-                sprintf(response, "Goodbye!");
+                write(client_fd, msg_goodbye, strlen(msg_goodbye));
                 break;
         }
     // Handle unknown command
-    } else sprintf(response, "Unknown command '%s'", cmd_str);
+    } else write(client_fd, msg_unknown, strlen(msg_unknown));
 
-    strcat(response+strlen(response), "\n");
     return quit;
 }
