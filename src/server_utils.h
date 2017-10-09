@@ -28,6 +28,9 @@
 #define DEFAULT_PROTOCOL (0)
 #define MAX_CONNECTIONS (1)
 
+// Pre-defined messages
+static const char *msg_goodbye = "Goodbye!\n";
+static const char *msg_unknown = "Unkown command\n";
 
 // Print the usage message and return status
 int usage(int status=EXIT_SUCCESS);
@@ -44,4 +47,4 @@ int accept_client(
 
 // Inspect client message, perform specified command,
 // and set response. Reports if client finished
-bool dispatch_command(const char *msg, char *response);
+bool dispatch_command(const int client_fd, const char *msg);

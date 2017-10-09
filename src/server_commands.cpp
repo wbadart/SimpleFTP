@@ -13,36 +13,36 @@
 #include "server_commands.h"
 
 
-void cmd_dwld(char *response, std::string fname) {
-    sprintf(response, "COMMAND DWLD, target: %s", fname.c_str());
+void cmd_dwld(int client_fd, std::string fname) {
+    write(client_fd, "DWLD\n", strlen("DWLD\n"));
 }
 
 
-void cmd_upld(char *response, std::string fname) {
-    sprintf(response, "COMMAND UPLD, target: %s", fname.c_str());
+void cmd_upld(int client_fd, std::string fname) {
+    write(client_fd, "UPLD\n", strlen("DWLD\n"));
 }
 
 
-void cmd_delf(char *response, std::string fname) {
-    sprintf(response, "COMMAND DELF, target: %s", fname.c_str());
+void cmd_delf(int client_fd, std::string fname) {
+    write(client_fd, "DELF\n", strlen("DWLD\n"));
 }
 
 
-void cmd_list(char *response) {
-    sprintf(response, "COMMAND LIST");
+void cmd_list(int client_fd) {
+    write(client_fd, "LIST\n", strlen("DWLD\n"));
 }
 
 
-void cmd_mdir(char *response, std::string fname) {
-    sprintf(response, "COMMAND MDIR, target: %s", fname.c_str());
+void cmd_mdir(int client_fd, std::string fname) {
+    write(client_fd, "MDIR\n", strlen("DWLD\n"));
 }
 
 
-void cmd_rdir(char *response, std::string fname) {
-    sprintf(response, "COMMAND RDIR, target: %s", fname.c_str());
+void cmd_rdir(int client_fd, std::string fname) {
+    write(client_fd, "RDIR\n", strlen("DWLD\n"));
 }
 
 
-void cmd_cdir(char *response, std::string fname) {
-    sprintf(response, "COMMAND CDIR, target: %s", fname.c_str());
+void cmd_cdir(int client_fd, std::string fname) {
+    write(client_fd, "CDIR\n", strlen("DWLD\n"));
 }

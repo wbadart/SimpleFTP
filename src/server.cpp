@@ -30,14 +30,11 @@ int main(int argc, char *argv[]) {
         int client_fd = accept_client(listen_sockfd, me);
 
         // Read messages
-        char msg[BUFSIZ], response[BUFSIZ]; int msg_len = 0;
+        char msg[BUFSIZ]; int msg_len = 0;
         while((msg_len = read(client_fd, msg, sizeof(msg))) > 0) {
             log("client message: >>%s<<", msg);
             // Inspect `msg' and run command. Sets `response'
-            bool should_quit = dispatch_command(msg, response);
-            // Send response string
-            if(write(client_fd, response, strlen(response)) < 0)
-                error("Unable to send response '%s'", response);
+            bool should_quit = dispatch_command(client_fd, msg);
 
             if(should_quit) {
                 msg_len = 0;  // Trigger "Client done"
