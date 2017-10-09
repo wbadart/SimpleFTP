@@ -15,9 +15,10 @@
 
 int usage(int status) {
     std::cout
-        << "usage: myftpf [-v] PORT\n"
-        << "    -v      Enable debugging messages.\n"
-        << "    PORT    Port on which to listen for incoming connections.\n";
+        << "usage: myftpd [ -h --help ] [ -v ] PORT\n"
+        << "    PORT        Port on which to listen for incoming connections.\n"
+        << "    -v          Enable debugging messages.\n"
+        << "    -h --help   Show this help message and exit.\n";
     return status;
 }
 
