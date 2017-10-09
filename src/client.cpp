@@ -50,9 +50,14 @@ int main(int argc, char *argv[]) {
 		char msg[] = "Failed to connect to server\n";
 		error(msg);
 	}
-	printf("%s", prompt);
+	std::string name;
+	char dir_name[BUFSIZ];
 
-	while (fgets(msg_buffer, BUFSIZ, stdin)) {
+	bool quit = false;
+	while (!quit) {
+
+		printf("%s", prompt);
+		fgets(msg_buffer, BUFSIZ, stdin);
 		// strip the end of line off of the command
 		std::string cmd = strip(msg_buffer);
 		// check the command and do respective action(s)
@@ -61,46 +66,51 @@ int main(int argc, char *argv[]) {
 				case Command::DWLD:
 					// cmd_dwld()
 					break;
+
 				case Command::UPLD:
 					// cmd_upld()
 					break;
+
 				case Command::DELF:
 					// cmd_delf()
 					break;
+
 				case Command::LIST:
 					cmd_list(socket_fd);
 					break;
+
 				case Command::MDIR:
-					// cmd_mdir()
+					fgets(dir_name, BUFSIZ, stdin);
+					name = strip(dir_name);
+					cmd_mdir(socket_fd, name);
+					bzero(dir_name, BUFSIZ);
 					break;
+
 				case Command::RDIR:
-					// cmd_rdir()
+					fgets(dir_name, BUFSIZ, stdin);
+					name = strip(dir_name);
+					cmd_rdir(socket_fd, name);
+					bzero(dir_name, BUFSIZ);
 					break;
+
 				case Command::CDIR:
-					// cmd_cdir()
+					fgets(dir_name, BUFSIZ, stdin);
+					name = strip(dir_name);
+					cmd_cdir(socket_fd, name);
+					bzero(dir_name, BUFSIZ);
 					break;
+
 				case Command::QUIT:
 					printf("Goodbye!\n");
+					quit = true;
 					break;
+
 				default:
 					printf("Unknown command\n");
 					continue;
 			}
 		}
- 
-		// // send message to server
-		// if (send(socket_fd, msg_buffer, strlen(msg_buffer), 0) == -1) {
-		// 	char msg[] = "Client failed to send message\n";
-		// 	error(msg);
-		// }
 
-		// // get server's response
-		// if (recv(socket_fd, msg_buffer, BUFSIZ, 0) == -1) {
-		// 	char msg[] = "Client failed to receive message\n";
-		// 	error(msg);
-		// }
-
-		printf("%s", prompt);
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
 	}

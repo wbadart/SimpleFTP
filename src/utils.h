@@ -20,6 +20,8 @@
 #include <iostream>     // cout
 #include <map>
 #include <string>
+#include <sys/socket.h> // socket, connect, send, recv
+
 
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 
@@ -43,6 +45,12 @@ const std::map<std::string, Command> CMD_LABELS = {
     {"quit", Command::QUIT},
     {"exit", Command::QUIT},
 };
+
+// wrapper for write()
+void _write(int socket_fd, char* message, char* error_msg);
+
+// wrapper for read()
+void _read(int socket_fd, char* message, char* error_msg);
 
 // Report error and exit with status
 void error(char *fmt, ...);
