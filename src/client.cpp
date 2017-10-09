@@ -11,14 +11,6 @@
  **/
 
 #include "client_utils.h"
-#include "utils.h"
-#include <sys/socket.h> // socket, connect, send, recv
-#include <unistd.h>     // close
-#include <sys/types.h>  // PF_INET, SOCK_STREAM
-#include <netdb.h>      // hostent, gethostbyname
-#include <stdio.h>      // fgets
-
-#define MAX_MSG 256
 
 int main(int argc, char *argv[]) {
 	// check for correct number of args
@@ -30,7 +22,8 @@ int main(int argc, char *argv[]) {
 	struct hostent* hp;
 	hp = gethostbyname(argv[1]);
 	if (!hp) {
-		error("Host cannot be found\n");
+		char msg[] = "Host cannot be found\n";
+		error(msg);
 	}
 
 	// buffer for sending and receiving messages
@@ -38,7 +31,6 @@ int main(int argc, char *argv[]) {
 	bzero(msg_buffer, BUFSIZ);
 
 	char const prompt[] = ">>> ";
-	int state = 0;
 
 	int socket_fd;
 	struct sockaddr_in sin;
@@ -49,66 +41,64 @@ int main(int argc, char *argv[]) {
 
 	// create socket
 	if ((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		error("Failed to create socket\n");
+		char msg[] = "Failed to create socket\n";
+		error(msg);
 	}
 
 	// connect()
 	if (connect(socket_fd, (struct sockaddr*) &sin, sizeof(sin)) < 0) {
-		error("Failed to connect to server\n");
+		char msg[] = "Failed to connect to server\n";
+		error(msg);
 	}
 	printf("%s", prompt);
 
 	while (fgets(msg_buffer, BUFSIZ, stdin)) {
+		// strip the end of line off of the command
+		std::string cmd = strip(msg_buffer);
 		// check the command and do respective action(s)
-		if (streq(msg_buffer, "DWLD\n")) {
-
-		} else if (streq(msg_buffer, "UPLD\n")) {
-			state = 1;
-		} else if (streq(msg_buffer, "LIST\n")) {
-			state = 2;
-		} else if (streq(msg_buffer, "MDIR\n")) {
-			state = 3;
-		} else if (streq(msg_buffer, "RDIR\n")) {
-			state = 4;
-		} else if (streq(msg_buffer, "CDIR\n")) {
-			state = 5;
-		} else if (streq(msg_buffer, "DELF\n")) {
-			state = 6;
-		} else if (streq(msg_buffer, "QUIT\n")) {
-			printf("Goodbye!\n");
-			break;			
-		} else {
-			printf("Unknown command\n");
-			continue;
+		if (CMD_LABELS.count(cmd) > 0) {
+			switch (CMD_LABELS.at(cmd)) {
+				case Command::DWLD:
+					// cmd_dwld()
+					break;
+				case Command::UPLD:
+					// cmd_upld()
+					break;
+				case Command::DELF:
+					// cmd_delf()
+					break;
+				case Command::LIST:
+					cmd_list(socket_fd);
+					break;
+				case Command::MDIR:
+					// cmd_mdir()
+					break;
+				case Command::RDIR:
+					// cmd_rdir()
+					break;
+				case Command::CDIR:
+					// cmd_cdir()
+					break;
+				case Command::QUIT:
+					printf("Goodbye!\n");
+					break;
+				default:
+					printf("Unknown command\n");
+					continue;
+			}
 		}
  
-		// send message to server
-		if (send(socket_fd, msg_buffer, strlen(msg_buffer), 0) == -1) {
-			error("Client failed to send message\n");
-		}
+		// // send message to server
+		// if (send(socket_fd, msg_buffer, strlen(msg_buffer), 0) == -1) {
+		// 	char msg[] = "Client failed to send message\n";
+		// 	error(msg);
+		// }
 
-		// get server's response
-		if (recv(socket_fd, msg_buffer, BUFSIZ, 0) == -1) {
-			error("Client failed to receive message\n");
-		}
-
-		// handle the result based on what command they initially entered
-		switch (state) {
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				break;
-			case 4:
-				break;
-			case 5:
-				break;
-			case 6:
-				break;
-			default:
-				error("Could not properly handle response\n");
-		}
+		// // get server's response
+		// if (recv(socket_fd, msg_buffer, BUFSIZ, 0) == -1) {
+		// 	char msg[] = "Client failed to receive message\n";
+		// 	error(msg);
+		// }
 
 		printf("%s", prompt);
 		// clear buffer

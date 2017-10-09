@@ -14,5 +14,14 @@
 
 #include <iostream>
 #include <string.h>
+#include <sys/socket.h> // socket, connect, send, recv
+#include <unistd.h>     // close
+#include <sys/types.h>  // PF_INET, SOCK_STREAM
+#include <netdb.h>      // hostent, gethostbyname
+#include <stdio.h>      // fgets
+
+#include "client_commands.h"
+#include "utils.h"
 
 int usage(int status=0);
+std::string strip(char*);

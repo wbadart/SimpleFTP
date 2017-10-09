@@ -12,7 +12,6 @@
 
 #include "client_utils.h"
 
-
 int usage(int status) {
     std::cout
         << "usage: myftp HOST PORT\n"
@@ -20,3 +19,13 @@ int usage(int status) {
         << "    PORT    Port on which myftpd is listening.\n";
     return status;
 }
+
+// strips the end of line from a string
+std::string strip(char* msg) {
+	std::string s(msg);
+	int i = s.find('\n');
+	if (i != std::string::npos) 
+		s.erase(i);
+	return s;
+}
+
