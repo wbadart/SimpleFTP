@@ -12,6 +12,8 @@
 
 #include "server_utils.h"
 
+int LOG_LVL;
+
 
 int usage(int status) {
     std::cout
@@ -92,7 +94,7 @@ bool dispatch_command(const int client_fd, const char *msg) {
     // Isolate command
     msg_ss >> cmd_str;
     str2lower(cmd_str);
-    log("Dispatching command '%s'", cmd_str);
+    log("Dispatching command '%s'", cmd_str.c_str());
 
     // Get argument file/ directory name
     std::getline(msg_ss, fname);

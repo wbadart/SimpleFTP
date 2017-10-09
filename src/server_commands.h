@@ -13,8 +13,12 @@
 #pragma once
 
 #include <cstring>  // strlen
+#include <dirent.h> // opendir
 #include <string>
 #include <unistd.h> // write
+
+#include "server_utils.h"
+#include "utils.h"
 
 void cmd_dwld(int client_fd, std::string fname);
 void cmd_upld(int client_fd, std::string fname);

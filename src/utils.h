@@ -24,7 +24,7 @@
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 
 // Default log level (i.e. disabled)
-inline int LOG_LVL = 0;
+extern int LOG_LVL;
 
 // Standardized command labels
 enum class Command {
