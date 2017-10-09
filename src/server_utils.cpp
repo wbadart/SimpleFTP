@@ -41,7 +41,7 @@ void parse_args(int argc, char *argv[], int &port) {
 }
 
 
-int get_socket(const int port) {
+int get_socket(const int port, struct sockaddr_in &sin) {
     int fd = socket(AF_INET, SOCK_STREAM, DEFAULT_PROTOCOL);
     if(fd < 0) error("Unable to get socket descriptor");
 
@@ -56,7 +56,6 @@ int get_socket(const int port) {
         error("Unable to enable address reuse");
 
     // Establish socket address for bind
-    struct sockaddr_in sin;
     bzero(&sin, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
@@ -65,6 +64,9 @@ int get_socket(const int port) {
     if(bind(fd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
         error("Unable to bind to port %d", port);
     log("Bind to port %d successful", port);
+
+    if(listen(fd, MAX_CONNECTIONS) < 0)
+        error("Unable to listen");
 
     return fd;
 }

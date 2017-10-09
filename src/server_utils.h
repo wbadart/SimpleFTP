@@ -17,9 +17,11 @@
 #include <iostream>     // cout
 #include <netdb.h>      // sockaddr_in
 #include <sys/socket.h> // bind, socket
+#include <unistd.h>     // read
 #include "utils.h"      // error, log
 
 #define DEFAULT_PROTOCOL (0)
+#define MAX_CONNECTIONS (1)
 
 // Print the usage message and return status
 int usage(int status=EXIT_SUCCESS);
@@ -28,4 +30,4 @@ int usage(int status=EXIT_SUCCESS);
 void parse_args(int argc, char *argv[], int &port);
 
 // Encapsulate socket setup operations
-int get_socket(const int port);
+int get_socket(const int port, struct sockaddr_in&);
