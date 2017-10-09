@@ -34,10 +34,15 @@ int main(int argc, char *argv[]) {
         while((msg_len = read(client_fd, msg, sizeof(msg))) > 0) {
             log("client message: >>%s<<", msg);
             // Inspect `msg' and run command. Sets `response'
-            dispatch_command(msg, response);
+            bool should_quit = dispatch_command(msg, response);
             // Send response string
             if(write(client_fd, response, strlen(response)) < 0)
                 error("Unable to send response '%s'", response);
+
+            if(should_quit) {
+                msg_len = 0;  // Trigger "Client done"
+                break;
+            }
         }
 
         // Handle client finishing

@@ -12,22 +12,43 @@
 
 #pragma once
 
-#include <cstdlib>  // exit
-#include <cstdarg>  // va_list
-#include <cstring>  // strcmp
-#include <iostream> // cout
+#include <algorithm>    // transform
+#include <cctype>       // tolower
+#include <cstdlib>      // exit
+#include <cstdarg>      // va_list
+#include <cstring>      // strcmp
+#include <iostream>     // cout
+#include <map>
+#include <string>
 
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 
 // Default log level (i.e. disabled)
 inline int LOG_LVL = 0;
 
-#define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
+// Standardized command labels
+enum class Command {
+    DWLD, UPLD, DELF, LIST, MDIR, RDIR, CDIR, QUIT };
 
-extern int LOG_LVL;
+// Standard command labels, prevent typos
+// usage: Command cmd = CMD_LABELS[cmdstr]
+const std::map<std::string, Command> CMD_LABELS = {
+    {"dwld", Command::DWLD},
+    {"upld", Command::UPLD},
+    {"delf", Command::DELF},
+    {"list", Command::LIST},
+    {"mdir", Command::MDIR},
+    {"rdir", Command::RDIR},
+    {"cdir", Command::CDIR},
+    {"quit", Command::QUIT},
+    {"exit", Command::QUIT},
+};
 
 // Report error and exit with status
 void error(char *fmt, ...);
 
 // Conditionally report debugging messages
 void log(char *fmt, ...);
+
+// Convert std::string to lowercase
+std::string str2lower(std::string s);

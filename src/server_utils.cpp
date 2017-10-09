@@ -83,6 +83,52 @@ int accept_client(
 }
 
 
-void dispatch_command(const char *msg, char *response) {
-    strcpy(response, "Hello there!\n");
+bool dispatch_command(const char *msg, char *response) {
+    std::string msg_str, cmd_str, fname;
+    std::stringstream msg_ss;
+    msg_ss << msg;
+
+    // Isolate command
+    msg_ss >> cmd_str;
+    str2lower(cmd_str);
+    log("Dispatching command '%s'", cmd_str);
+
+    // Get argument file/ directory name
+    std::getline(msg_ss, fname);
+
+    // Dispatch command
+    bool quit = false;
+    if(CMD_LABELS.count(cmd_str) > 0) {
+        switch(CMD_LABELS.at(cmd_str)) {
+            case Command::DWLD:
+                cmd_dwld(response, fname);
+                break;
+            case Command::UPLD:
+                cmd_upld(response, fname);
+                break;
+            case Command::DELF:
+                cmd_delf(response, fname);
+                break;
+            case Command::LIST:
+                cmd_list(response);
+                break;
+            case Command::MDIR:
+                cmd_mdir(response, fname);
+                break;
+            case Command::RDIR:
+                cmd_rdir(response, fname);
+                break;
+            case Command::CDIR:
+                cmd_cdir(response, fname);
+                break;
+            case Command::QUIT:
+                quit = true;
+                sprintf(response, "Goodbye!");
+                break;
+        }
+    // Handle unknown command
+    } else sprintf(response, "Unknown command '%s'", cmd_str);
+
+    strcat(response+strlen(response), "\n");
+    return quit;
 }
