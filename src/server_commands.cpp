@@ -18,15 +18,12 @@ void cmd_dwld(int client_fd) {
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
     uint16_t name_size = 0;
-    uint32_t file_size;
+    uint32_t file_size = 0;
     char* name, size_str[10];
 
-    log("BUFFER: %s", msg_buffer);
     parse_message(msg_buffer, name_size, name);
-    log("%u - %s", name_size, name);
 
     FILE* fp;
-    log("hello %s", name);
     fp = fopen(name, "r");
 
     if (!fp) {
@@ -43,9 +40,8 @@ void cmd_dwld(int client_fd) {
     }
 
     while (true) {
-        log("hello");
+        // clear buffer
         bzero(msg_buffer, BUFSIZ);
-        log("hello");
         // read from file
         if (file_size > BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
         else fread(msg_buffer, 1, file_size, fp);
@@ -62,8 +58,39 @@ void cmd_dwld(int client_fd) {
 }
 
 
-void cmd_upld(int client_fd) {
-    write(client_fd, "UPLD\n", strlen("DWLD\n"));
+void cmd_upld(int client_fd, std::string fname) {
+    
+    char msg_buffer[BUFSIZ];
+    _read(client_fd, msg_buffer, "Failed to get file information\n");
+
+    uint16_t name_size = 0;
+    uint32_t file_size = 0;
+    char* name;
+
+    parse_message(msg_buffer, name_size, name);
+    char* name2 = nullptr;
+    strcpy(name2, name);
+
+    _write(client_fd, "1", "Failed to send upload confirmation\n");
+
+    bzero(msg_buffer, BUFSIZ);
+    _read(client_fd, msg_buffer, "Failed to get file size from client\n");
+
+    file_size = ntohl(atoi(msg_buffer));
+
+    FILE* fp;
+    fp = fopen(name2, "w+");
+
+    while (true) {
+        bzero(msg_buffer, BUFSIZ);
+        _read(client_fd, msg_buffer, "Failed to get file data from client\n");
+        fputs(msg_buffer, fp);
+        if (file_size <= BUFSIZ) break;
+        fseek(fp, BUFSIZ, SEEK_CUR);
+        file_size -= BUFSIZ;
+    }
+    fclose(fp);
+
 }
 
 
