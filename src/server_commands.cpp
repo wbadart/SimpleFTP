@@ -12,7 +12,7 @@
 
 #include "server_commands.h"
 
-void cmd_dwld(int client_fd, std::string fname) {
+void cmd_dwld(int client_fd) {
 
     char msg_buffer[BUFSIZ];
     _read(client_fd, msg_buffer, "Failed to get file information\n");
@@ -62,12 +62,12 @@ void cmd_dwld(int client_fd, std::string fname) {
 }
 
 
-void cmd_upld(int client_fd, std::string fname) {
+void cmd_upld(int client_fd) {
     write(client_fd, "UPLD\n", strlen("DWLD\n"));
 }
 
 
-void cmd_delf(int client_fd, std::string fname) {
+void cmd_delf(int client_fd) {
     if(remove(fname.c_str()) < 0) _write(
         client_fd, "Unable to remove file", "Couldn't report DELF failure");
     else _write(
@@ -124,17 +124,37 @@ void cmd_list(int client_fd) {
 }
 
 
-void cmd_mdir(int client_fd, std::string fname) {
+void cmd_mdir(int client_fd) {
     write(client_fd, "MDIR\n", strlen("DWLD\n"));
+    uint16_t len;
+    char *dir_name;
+
+    parse_message(fname.c_str(), &len, dir_name);
+
+    struct stat st;
+    char *msg;
+	if (stat(dir_name, &st) == -1) {
+    	if( (mkdir(dir_name, 0700)) == -1){
+    		sprintf(msg,"%d",-1);
+    		_write(client_fd,msg,"Failed to send directory failed to create message");
+    	} else {
+    		sprintf(msg,"%d",1);
+    		_write(client_fd,msg,"Failed to send directory creation confirmation");
+    	}
+    } else{
+		sprintf(msg,"%d",-2);
+    	_write(client_fd, msg, "Failed to send directory exists message");
+	}
+
 }
 
 
-void cmd_rdir(int client_fd, std::string fname) {
+void cmd_rdir(int client_fd) {
     write(client_fd, "RDIR\n", strlen("DWLD\n"));
 }
 
 
-void cmd_cdir(int client_fd, std::string fname) {
+void cmd_cdir(int client_fd) {
     write(client_fd, "CDIR\n", strlen("DWLD\n"));
 }
 

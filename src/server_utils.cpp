@@ -87,7 +87,7 @@ int accept_client(
 
 
 bool dispatch_command(const int client_fd, const char *msg) {
-    std::string msg_str, cmd_str, fname;
+    std::string msg_str, cmd_str;
     std::stringstream msg_ss;
     msg_ss << msg;
 
@@ -96,33 +96,30 @@ bool dispatch_command(const int client_fd, const char *msg) {
     str2lower(cmd_str);
     log("Dispatching command '%s'", cmd_str.c_str());
 
-    // Get argument file/ directory name
-    std::getline(msg_ss, fname);
-
     // Dispatch command
     bool quit = false;
     if(CMD_LABELS.count(cmd_str) > 0) {
         switch(CMD_LABELS.at(cmd_str)) {
             case Command::DWLD:
-                cmd_dwld(client_fd, fname);
+                cmd_dwld(client_fd);
                 break;
             case Command::UPLD:
-                cmd_upld(client_fd, fname);
+                cmd_upld(client_fd);
                 break;
             case Command::DELF:
-                cmd_delf(client_fd, fname);
+                cmd_delf(client_fd);
                 break;
             case Command::LIST:
                 cmd_list(client_fd);
                 break;
             case Command::MDIR:
-                cmd_mdir(client_fd, fname);
+                cmd_mdir(client_fd);
                 break;
             case Command::RDIR:
-                cmd_rdir(client_fd, fname);
+                cmd_rdir(client_fd);
                 break;
             case Command::CDIR:
-                cmd_cdir(client_fd, fname);
+                cmd_cdir(client_fd);
                 break;
             case Command::QUIT:
                 quit = true;
