@@ -16,21 +16,20 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	char cmd[] = "dwld";
 
 	// send initial message to server
-	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
-	_write(socket_fd, cmd, error_msg);
+	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
 	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
 
-	strcpy(error_msg, "Client failed to send file name information\n");
-	_write(socket_fd, msg_buffer, error_msg);
+	printf("%s\n", msg_buffer);
+	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
 
 	bzero(msg_buffer, BUFSIZ);
 	// get server's response
-	strcpy(error_msg, "Client failed to receive file size\n");
-	_read(socket_fd,msg_buffer, error_msg);
+	_read(socket_fd, msg_buffer, "Client failed to receive file size\n");
 
 	// convert the size of directory to int
+	printf("BUFFER: %s\n", msg_buffer);
 	int file_size = atoi(msg_buffer);
 	if (file_size == -1 || file_size == 0) {
 		printf("File does not exist on server\n");
@@ -47,11 +46,9 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 
 	fp = fopen(file_name.c_str(), "w+");
 
-	strcpy(error_msg, "Client failed to receive file data\n");
-
 	for (i = 0; i < frames; i++) {
 		// change it so it doesnt put data in beginning of error_msg_buffer
-		_read(socket_fd, msg_buffer, error_msg);
+		_read(socket_fd, msg_buffer, "Client failed to receive file data\n");
 		// write to file
 		fputs(msg_buffer, fp);
 		fseek(fp, BUFSIZ, SEEK_CUR);
@@ -174,18 +171,11 @@ void cmd_list(int socket_fd) {
 		error("Client received an invalid directory size\n");
 	}
 
-	// clear buffer
-	bzero(msg_buffer, BUFSIZ);
-
-	int frames = dir_size / BUFSIZ, i, bytes;
-	if (dir_size % BUFSIZ != 0 || frames == 0) frames++;
-
-	for (i = 0; i < frames; i++) {
-		// change it so it doesnt put data in beginning of msg_buffer
-		bytes = _read(socket_fd, msg_buffer, "Client failed to receive directory data\n");
-		msg_buffer[bytes] = '\0';
-		printf("%s", msg_buffer);
+	while (dir_size > 0) {
 		bzero(msg_buffer, BUFSIZ);
+		_read(socket_fd, msg_buffer, "Client failed to receive directory data\n");
+		dir_size -= BUFSIZ;
+		printf("%s", msg_buffer);
 	}
 }
 

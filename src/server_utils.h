@@ -48,3 +48,9 @@ int accept_client(
 // Inspect client message, perform specified command,
 // and set response. Reports if client finished
 bool dispatch_command(const int client_fd, const char *msg);
+
+// parsing the file size, file name format
+void parse_message(char* message, int &length, char* &name);
+
+// check if a file exists in the current directory
+int check_file(char* file_name);

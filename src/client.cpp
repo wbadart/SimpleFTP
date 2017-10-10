@@ -50,39 +50,39 @@ int main(int argc, char *argv[]) {
 		char msg[] = "Failed to connect to server\n";
 		error(msg);
 	}
-	std::string name, cmd;
+	std::string name, cmd, msg;
+	std::string msg_str, cmd_str, fname;
+    std::stringstream msg_ss;
 	char dir_name[BUFSIZ];
 
 	bool quit = false;
 	while (!quit) {
 
-		printf("%s", prompt);
 		fgets(msg_buffer, BUFSIZ, stdin);
 		// strip the end of line off of the command
-		cmd = strip(msg_buffer);
+		msg = strip(msg_buffer);
+		msg_ss << msg;
+		msg_ss >> cmd;
 		// check the command and do respective action(s)
 		if (CMD_LABELS.count(cmd) > 0) {
 			switch (CMD_LABELS.at(cmd)) {
 				case Command::DWLD:
 					// get name of file to be downloaded
-					fgets(dir_name, BUFSIZ, stdin);
-					name = strip(dir_name);
+					msg_ss >> name;
 					cmd_dwld(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
 					break;
 
 				case Command::UPLD:
 					// get name of file to upload
-					fgets(dir_name, BUFSIZ, stdin);
-					name = strip(dir_name);
+					msg_ss >> name;
 					cmd_upld(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
 					break;
 
 				case Command::DELF:
 					// get name of file to be deleted
-					fgets(dir_name, BUFSIZ, stdin);
-					name = strip(dir_name);
+					msg_ss >> name;
 					cmd_mdir(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
 					break;
@@ -93,24 +93,21 @@ int main(int argc, char *argv[]) {
 
 				case Command::MDIR:
 					// get name of directory to be made
-					fgets(dir_name, BUFSIZ, stdin);
-					name = strip(dir_name);
+					msg_ss >> name;
 					cmd_mdir(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
 					break;
 
 				case Command::RDIR:
 					// get name of directory to delete
-					fgets(dir_name, BUFSIZ, stdin);
-					name = strip(dir_name);
+					msg_ss >> name;
 					cmd_rdir(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
 					break;
 
 				case Command::CDIR:
 					// get name of directory to change to
-					fgets(dir_name, BUFSIZ, stdin);
-					name = strip(dir_name);
+					msg_ss >> name;
 					cmd_cdir(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
 					break;
@@ -128,6 +125,8 @@ int main(int argc, char *argv[]) {
 
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
+		// clear sstream
+		msg_ss.clear();
 	}
 
 	close(socket_fd);
