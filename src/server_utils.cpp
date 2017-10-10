@@ -62,7 +62,7 @@ int get_socket(const int port, struct sockaddr_in &sin) {
     bzero(&sin, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
-    sin.sin_addr.s_addr = INADDR_ANY;
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if(bind(fd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
         error("Unable to bind to port %d", port);
