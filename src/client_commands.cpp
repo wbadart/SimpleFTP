@@ -79,7 +79,6 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	bzero(msg_buffer, BUFSIZ);
 
 	_read(socket_fd, msg_buffer, "Client failed to get response from server\n");
-	log("%s", msg_buffer);
 	if (atoi(msg_buffer) != 1)
 		error("Failed to get response from upload command\n");
 
@@ -88,6 +87,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	// get the file size
 	struct stat st;
 	stat(file_name.c_str(), &st);
+	int original_size = st.st_size;
 	uint32_t file_size = htonl(st.st_size);
 
 	// send server file size
@@ -101,8 +101,6 @@ void cmd_upld(int socket_fd, std::string file_name) {
 		printf("The file you selected is empty\n");
 		return;
 	}
-
-	int original_size = file_size;
 
 	FILE* fp;
 	fp = fopen(file_name.c_str(), "r");
@@ -126,10 +124,11 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	}
 	gettimeofday(&end, NULL);
 
-	float time_elap = (end.tv_usec - start.tv_usec) / 1000000.0;
+	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)
+		  - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0;
 	float mbps = original_size / time_elap / 1000000.0;
 
-	printf("%d bytes transferred in %7.5f seconds: %3.2f Megabytes/s\n", 
+	printf("%d bytes transferred in %7.5f seconds: %8.5f Megabytes/s\n", 
 		original_size, time_elap, mbps);
 
 	fclose(fp);

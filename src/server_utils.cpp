@@ -138,7 +138,7 @@ void parse_message(char* message, uint16_t &length, char* name) {
 
     token = strtok(message, delim);
     length = ntohs(atoi(token));
-    name = strtok(NULL, delim);
+    strcpy(name, strtok(NULL, delim));
 }
 
 int check_file(char* file_name) {
