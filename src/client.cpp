@@ -85,8 +85,6 @@ int main(int argc, char *argv[]) {
 					name = strip(dir_name);
 					cmd_mdir(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
-					printf("hi");
-					fflush(stdout);
 					break;
 
 				case Command::LIST:

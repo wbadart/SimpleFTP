@@ -191,13 +191,14 @@ void cmd_list(int socket_fd) {
 	// clear buffer
 	bzero(msg_buffer, BUFSIZ);
 
-	int frames = dir_size / BUFSIZ, i;
+	int frames = dir_size / BUFSIZ, i, bytes;
 	if (dir_size % BUFSIZ != 0 || frames == 0) frames++;
 
 	strcpy(msg, "Client failed to receive directory data\n");
 	for (i = 0; i < frames; i++) {
 		// change it so it doesnt put data in beginning of msg_buffer
-		_read(socket_fd, msg_buffer, msg);
+		bytes = _read(socket_fd, msg_buffer, msg);
+		msg_buffer[bytes] = '\0';
 		printf("%s", msg_buffer);
 		bzero(msg_buffer, BUFSIZ);
 	}
