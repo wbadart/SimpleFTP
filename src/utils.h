@@ -25,6 +25,7 @@
 #include <sys/socket.h> // socket, connect, send, recv
 #include <unistd.h>     // read, write
 
+#define BUFSIZ 1024
 
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 
