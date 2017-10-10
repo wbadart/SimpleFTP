@@ -46,7 +46,7 @@ void error(char *fmt, ...) {
 
 
 void log(char *fmt, ...) {
-    // if(LOG_LVL < 1) return;  
+    //if(LOG_LVL < 1) return;
     va_list args;
     char msg[BUFSIZ], *prefix = "DEBUG: ";
     strcpy(msg, prefix);
