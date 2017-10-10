@@ -110,7 +110,7 @@ bool dispatch_command(const int client_fd, const char *msg) {
                 cmd_upld(client_fd, fname);
                 break;
             case Command::DELF:
-                cmd_delf(client_fd, fname);
+                cmd_delf(client_fd);
                 break;
             case Command::LIST:
                 cmd_list(client_fd);

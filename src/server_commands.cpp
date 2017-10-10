@@ -59,7 +59,7 @@ void cmd_dwld(int client_fd, std::string fname) {
 
 
 void cmd_upld(int client_fd, std::string fname) {
-    
+
     char msg_buffer[BUFSIZ];
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
@@ -94,11 +94,33 @@ void cmd_upld(int client_fd, std::string fname) {
 }
 
 
-void cmd_delf(int client_fd, std::string fname) {
-    if(remove(fname.c_str()) < 0) _write(
-        client_fd, "Unable to remove file", "Couldn't report DELF failure");
-    else _write(
-        client_fd, "File successfully removed", "Couldn't report DELF success");
+void cmd_delf(int client_fd) {
+    char msg[BUFSIZ];
+    _read(client_fd, msg, "Failed to read name and name length");
+
+    // Get len(filename) and filename
+    uint16_t fname_len = 0; uint32_t file_len;
+    char *fname;
+    parse_message(msg, fname_len, fname);
+
+    // Check file existence and report to client
+    if(check_file(fname))
+        _write(client_fd, "1", "Couldn't report file existence");
+    else _write(client_fd, "-1", "Couln't report file not found");
+
+    // Check confirmation message
+    bzero(msg, sizeof(msg));
+    _read(client_fd, msg, "Couln't receive confirmation");
+    if(streq(msg, "No") || streq(msg, "no")) {
+        log("DELF abandoned by user");
+        return;
+    }
+
+    // Perform deletion
+    log("Deleting '%s'", fname);
+    if(remove(fname) == 0)
+        _write(client_fd, "Success", "Couln't report DELF success");
+    else _write(client_fd, "Failed", "Coun't report DELF fail");
 }
 
 

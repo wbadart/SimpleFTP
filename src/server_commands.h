@@ -22,7 +22,7 @@
 
 void cmd_dwld(int client_fd, std::string fname);
 void cmd_upld(int client_fd, std::string fname);
-void cmd_delf(int client_fd, std::string fname);
+void cmd_delf(int client_fd);
 void cmd_list(int client_fd);
 void cmd_mdir(int client_fd, std::string fname);
 void cmd_rdir(int client_fd, std::string fname);
