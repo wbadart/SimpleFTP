@@ -35,10 +35,14 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 		return;
 	}
 
+	int original_size = file_size;
 
 	FILE* fp;
 	fp = fopen(file_name.c_str(), "w+");
 
+	struct timeval start, end;
+
+	gettimeofday(&start, NULL);
 	while (true) {
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
@@ -49,6 +53,13 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 		file_size -= BUFSIZ;
 		fseek(fp, BUFSIZ, SEEK_CUR);
 	}
+	gettimeofday(&end, NULL);
+
+	float time_elap = (end.tv_usec - start.tv_usec) / 1000000.0;
+	float mbps = original_size / time_elap / 1000000.0;
+
+	printf("%d bytes transferred in %7.5f seconds: %3.2f Megabytes/s\n", 
+		original_size, time_elap, mbps);
 	fclose(fp);
 }
 
@@ -68,6 +79,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	bzero(msg_buffer, BUFSIZ);
 
 	_read(socket_fd, msg_buffer, "Client failed to get response from server\n");
+	log("%s", msg_buffer);
 	if (atoi(msg_buffer) != 1)
 		error("Failed to get response from upload command\n");
 
@@ -90,8 +102,13 @@ void cmd_upld(int socket_fd, std::string file_name) {
 		return;
 	}
 
+	int original_size = file_size;
+
 	FILE* fp;
 	fp = fopen(file_name.c_str(), "r");
+
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
 
 	while (true) {
 		// read from file
@@ -107,6 +124,13 @@ void cmd_upld(int socket_fd, std::string file_name) {
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
 	}
+	gettimeofday(&end, NULL);
+
+	float time_elap = (end.tv_usec - start.tv_usec) / 1000000.0;
+	float mbps = original_size / time_elap / 1000000.0;
+
+	printf("%d bytes transferred in %7.5f seconds: %3.2f Megabytes/s\n", 
+		original_size, time_elap, mbps);
 
 	fclose(fp);
 }
