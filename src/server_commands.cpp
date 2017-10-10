@@ -185,17 +185,11 @@ void cmd_mdir(int client_fd) {
     struct stat st;
 	if (stat(dir_name, &st) == -1) {
     	if( (mkdir(dir_name, 0700)) == -1){
-    		printf("dir_name: %s\n", dir_name);
-    		printf("failed\n");
     		_write(client_fd,"-1","Failed to send directory failed to create message");
     	} else {
-    		printf("dir_name: %s", dir_name);
-    		printf("made directory\n");
-    		printf("here\n");
     		_write(client_fd,"1","Failed to send directory creation confirmation");
     	}
     } else{
-    	printf("already exists!\n");
     	_write(client_fd, "-2", "Failed to send directory exists message");
 	}
 
