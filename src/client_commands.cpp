@@ -16,7 +16,7 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	char cmd[] = "DWLD";
 
 	// send initial message to server
-	char error_msg[] = "Client failed to send initial message\n";
+	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
 	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
@@ -66,7 +66,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	char cmd[] = "UPLD";
 
 	// send initial message to server
-	char error_msg[] = "Client failed to send initial message\n";
+	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
 	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
@@ -128,7 +128,7 @@ void cmd_delf(int socket_fd, std::string file_name) {
 	char cmd[] = "DELF";
 
 	// send initial message to server
-	char error_msg[] = "Client failed to send initial message\n";
+	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
 	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
@@ -174,7 +174,7 @@ void cmd_list(int socket_fd) {
 	bzero(msg_buffer, BUFSIZ);
 
 	// send message to server
-	char error_msg[] = "Client failed to send message\n";
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
 	_write(socket_fd, cmd, error_msg);
 
 	// get server's response
@@ -208,7 +208,7 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 	char cmd[] = "MDIR";
 
 	// send message to server
-	char error_msg[] = "Client failed to send message\n";
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
 	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
@@ -240,7 +240,7 @@ void cmd_rdir(int socket_fd, std::string dir_name) {
 	char cmd[] = "RDIR";
 
 	// send message to server
-	char error_msg[] = "Client failed to send message\n";
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
 	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
@@ -287,7 +287,7 @@ void cmd_cdir(int socket_fd, std::string dir_name) {
 	char cmd[] = "CDIR";
 
 	// send message to server
-	char error_msg[] = "Client failed to send message\n";
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
 	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
