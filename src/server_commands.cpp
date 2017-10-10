@@ -206,6 +206,28 @@ void cmd_rdir(int client_fd) {
     uint16_t dname_len = 0;
     char dname[BUFSIZ];
     parse_message(msg, dname_len, dname);
+
+    // Check directory existence
+    if(check_file(dname))
+        _write(client_fd, "1", "Couldn't report dir existence");
+    else _write(client_fd, "-1", "Couln't report dir not found");
+
+    // Check confirmation
+    bzero(msg, sizeof(msg));
+    _read(client_fd, msg, "Couln't receive confirmation");
+    if(streq(msg, "No") || streq(msg, "no")) {
+        log("RDIR abandoned by user");
+        return;
+    }
+
+    // Perform deletion
+    log("Deleting '%s'", dname);
+    if(remove(dname) == 0)
+        _write(client_fd, "Success", "Couln't report RDIR success");
+    else _write(
+        client_fd,
+        "Failed. Is the directory empty?",
+        "Coun't report RDIR fail");
 }
 
 
