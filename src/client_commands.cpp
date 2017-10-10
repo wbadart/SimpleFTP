@@ -74,7 +74,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
-	uint16_t file_length = htons(file_name.length());
+	uint16_t file_length = file_name.length();
 	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
 
 	// give server file name and size of name
@@ -92,7 +92,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	struct stat st;
 	stat(file_name.c_str(), &st);
 	int original_size = st.st_size;
-	uint32_t file_size = htonl(st.st_size);
+	uint32_t file_size = st.st_size;
 
 	// send server file size
 	sprintf(msg_buffer, "%u", file_size);
@@ -210,7 +210,7 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 	_write(socket_fd, cmd, "Client failed to send message\n");
 
 	char msg_buffer[BUFSIZ];
-	uint16_t file_length = htons(dir_name.length());
+	uint16_t file_length = dir_name.length();
 	sprintf(msg_buffer, "%u %s", file_length, dir_name.c_str());
 
 	// send message to server
