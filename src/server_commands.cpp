@@ -12,7 +12,6 @@
 
 #include "server_commands.h"
 
-
 void cmd_dwld(int client_fd, std::string fname) {
     write(client_fd, "DWLD\n", strlen("DWLD\n"));
 }
@@ -29,20 +28,55 @@ void cmd_delf(int client_fd, std::string fname) {
 
 
 void cmd_list(int client_fd) {
-    write(client_fd, "LIST\n", strlen("DWLD\n"));
+    //write(client_fd, "LIST\n", strlen("DWLD\n"));
 
     DIR *d = opendir(".");
     if(d == NULL)
         error("Couldn't open working directory");
 
+    char buffer[] = "";
+    //strcpy(buffer, "");
+
     struct dirent *e;
+    struct stat statbuf;
+    std::string perm_string;
+
     while((e = readdir(d))) {
         log("Found dir entity: %s", e->d_name);
+        // d_name gives us the null-terminated filename
+        printf("here\n");
+        fflush(stdout);
         if(streq(e->d_name, ".") || streq(e->d_name, ".."))
             continue;
+        else{
+        	stat(e->d_name,&statbuf);
+        	perm_string = permissions_string(statbuf);
+            log("%s", perm_string.c_str());
+        	/*
+        	char *ls_cmd;
+        	char *name = e->d_name;
+        	name[strlen(name)-1] = '\0';
+        	sprintf(ls_cmd,"ls %s", e);
+        	char *mesg = system(ls_cmd);
+        	printf("Message = %s\n", mesg);
+        	*/
+        }
 
-        // Stat...
+        sprintf(buffer, "%s%s %s\n", buffer,perm_string.c_str(),e->d_name);
+        // strcat(buffer, perm_string.c_str());
+        // strcat(buffer, " ");
+        // strcat(buffer, e->d_name);
+        // strcat(buffer, "\n");
+        log("Buffer: %s", buffer);
+
+        	//count the size of the message
+
+        	//send size of message
+
+        	//send message 
     }
+    log("hi there\n");
+        // Stat...
 }
 
 
