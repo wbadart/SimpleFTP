@@ -12,7 +12,6 @@
 
 #include "server_commands.h"
 
-
 void cmd_dwld(int client_fd, std::string fname) {
     write(client_fd, "DWLD\n", strlen("DWLD\n"));
 }
@@ -35,50 +34,50 @@ void cmd_list(int client_fd) {
     //write(client_fd, "LIST\n", strlen("DWLD\n"));
 
     DIR *d = opendir(".");
+
     if(d == NULL)
         error("Couldn't open working directory");
 
-    char buffer[] = "";
-    //strcpy(buffer, "");
+    char buffer[BUFSIZ];
+    strcpy(buffer, "");
 
     struct dirent *e;
     struct stat statbuf;
     std::string perm_string;
 
     while((e = readdir(d))) {
+
         log("Found dir entity: %s", e->d_name);
         // d_name gives us the null-terminated filename
-        printf("here\n");
-        fflush(stdout);
-        if(streq(e->d_name, ".") || streq(e->d_name, ".."))
+        if(streq(e->d_name, ".") || streq(e->d_name, "..")) {
             continue;
-        else{
+        } else {
         	stat(e->d_name,&statbuf);
         	perm_string = permissions_string(statbuf);
-        	/*
-        	char *ls_cmd;
-        	char *name = e->d_name;
-        	name[strlen(name)-1] = '\0';
-        	sprintf(ls_cmd,"ls %s", e);
-        	char *mesg = system(ls_cmd);
-        	printf("Message = %s\n", mesg);
-        	*/
+            log("%s", perm_string.c_str());
         }
 
-        sprintf(buffer, "%s%s %s\n", buffer,perm_string.c_str(),e->d_name);
-        // strcat(buffer, perm_string.c_str());
-        // strcat(buffer, " ");
-        // strcat(buffer, e->d_name);
-        // strcat(buffer, "\n");
-        printf("Buffer: %s", buffer);
+        strcat(buffer, perm_string.c_str());
+        strcat(buffer, " ");
+        strcat(buffer, e->d_name);
+        strcat(buffer, "\n");
 
-        	//count the size of the message
-
-        	//send size of message
-
-        	//send message
     }
-        // Stat...
+    closedir(d);
+    printf("%s", buffer);
+
+    char msg[BUFSIZ];
+    int buffer_size = strlen(buffer);
+    sprintf(msg, "%d", buffer_size);
+    _write(client_fd, msg, "Failed to send buffer size\n");
+
+    _write(client_fd, buffer, "Failed to send buffer data\n");
+
+    // while (true) {
+    //     if (buffer_size > BUFSIZ) {
+    //         _write(client_fd, )
+    //     }
+    // }
 }
 
 
