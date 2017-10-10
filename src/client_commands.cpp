@@ -78,6 +78,11 @@ void cmd_upld(int socket_fd, std::string file_name) {
 
 	bzero(msg_buffer, BUFSIZ);
 
+	strcpy(msg, "Client failed to get response from server\n");
+	_read(socket_fd, msg_buffer, msg);
+
+	bzero(msg_buffer, BUFSIZ);	
+
 	// get the file size
 	struct stat st;
 	stat(file_name.c_str(), &st);
@@ -103,12 +108,12 @@ void cmd_upld(int socket_fd, std::string file_name) {
 
 	while (true) {
 		// read from file
-		fgets(msg_buffer, BUFSIZ, fp);
+		if (file_size > BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
+		else fread(msg_buffer, 1, file_size, fp);
 		// send part of file
 		_write(socket_fd, msg_buffer, msg);
 		// to protect from seeking past EOF
-		if (file_size < BUFSIZ)
-			break;
+		if (file_size - BUFSIZ <= 0) break;
 		// move file pointer BUFSIZ bytes to read the next bits
 		fseek(fp, BUFSIZ, SEEK_CUR);
 		file_size -= BUFSIZ;
