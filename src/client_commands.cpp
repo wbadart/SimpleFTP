@@ -19,7 +19,7 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
-	uint16_t file_length = htons(file_name.length());
+	uint16_t file_length = file_name.length();
 	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
 
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
@@ -29,7 +29,7 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	_read(socket_fd, msg_buffer, "Client failed to receive file size\n");
 
 	// convert the size of directory to int
-	uint32_t file_size = ntohl(atoi(msg_buffer));
+	uint32_t file_size = atoi(msg_buffer);
 	if (file_size == -1 || file_size == 0) {
 		printf("File does not exist on server\n");
 		return;
@@ -54,7 +54,6 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 		fputs(msg_buffer, fp);
 		if (file_size < BUFSIZ) break;
 		file_size -= BUFSIZ;
-		// fseek(fp, BUFSIZ-1, SEEK_CUR);
 	}
 	gettimeofday(&end, NULL);
 
@@ -191,6 +190,7 @@ void cmd_list(int socket_fd) {
 
 	// convert the size of directory to int
 	int dir_size = atoi(msg_buffer);
+	log("%s", msg_buffer);
 	if (dir_size <= 0) {
 		error("Client received an invalid directory size\n");
 	}
