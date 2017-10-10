@@ -132,7 +132,7 @@ bool dispatch_command(const int client_fd, const char *msg) {
     return quit;
 }
 
-void parse_message(char* message, uint16_t &length, char* &name) {
+void parse_message(char* message, uint16_t &length, char* name) {
     const char delim[2] = " ";
     char* token;
 

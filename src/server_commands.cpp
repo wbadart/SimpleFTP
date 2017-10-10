@@ -100,7 +100,7 @@ void cmd_delf(int client_fd) {
 
     // Get len(filename) and filename
     uint16_t fname_len = 0; uint32_t file_len = 0;
-    char *fname;
+    char fname[BUFSIZ];
     parse_message(msg, fname_len, fname);
 
     // Check file existence and report to client
@@ -199,7 +199,13 @@ void cmd_mdir(int client_fd) {
 
 
 void cmd_rdir(int client_fd) {
-    write(client_fd, "RDIR\n", strlen("DWLD\n"));
+    char msg[BUFSIZ];
+    _read(client_fd, msg, "Failed to read name and name length");
+
+    // Get len(filename) and filename
+    uint16_t dname_len = 0;
+    char dname[BUFSIZ];
+    parse_message(msg, dname_len, dname);
 }
 
 
