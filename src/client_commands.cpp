@@ -19,9 +19,10 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
-
-	printf("%s\n", msg_buffer);
+	uint16_t file_length = htons(file_name.length());
+	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
+	
+	log("1 BUFFER: %s\n", msg_buffer);
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
 
 	bzero(msg_buffer, BUFSIZ);
@@ -30,7 +31,8 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 
 	// convert the size of directory to int
 	printf("BUFFER: %s\n", msg_buffer);
-	int file_size = atoi(msg_buffer);
+	uint32_t file_size = ntohl(atoi(msg_buffer));
+	printf("file_size: %d\n", file_size);
 	if (file_size == -1 || file_size == 0) {
 		printf("File does not exist on server\n");
 		return;
@@ -66,7 +68,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
+	sprintf(msg_buffer, "%hu %s", htons(file_name.length()), file_name.c_str());
 
 	// give server file name and size of name
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");

@@ -62,7 +62,7 @@ int get_socket(const int port, struct sockaddr_in &sin) {
     bzero(&sin, sizeof(sin));
     sin.sin_family = AF_INET;
     sin.sin_port = htons(port);
-    sin.sin_addr.s_addr = INADDR_ANY;
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if(bind(fd, (struct sockaddr*)&sin, sizeof(sin)) < 0)
         error("Unable to bind to port %d", port);
@@ -135,12 +135,12 @@ bool dispatch_command(const int client_fd, const char *msg) {
     return quit;
 }
 
-void parse_message(char* message, int &length, char* &name) {
+void parse_message(char* message, uint16_t &length, char* &name) {
     const char delim[2] = " ";
     char* token;
 
     token = strtok(message, delim);
-    length = atoi(token);
+    length = ntohs(atoi(token));
     name = strtok(NULL, delim);
 }
 

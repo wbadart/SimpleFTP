@@ -17,16 +17,16 @@ void cmd_dwld(int client_fd, std::string fname) {
     char msg_buffer[BUFSIZ];
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
-    int name_size = 0, file_size;
+    uint16_t name_size = 0;
+    uint32_t file_size;
     char* name, size_str[10];
 
+    log("BUFFER: %s", msg_buffer);
     parse_message(msg_buffer, name_size, name);
-    printf("%d - %s\n", name_size, name);
-
-    bzero(msg_buffer, BUFSIZ);
+    log("%u - %s", name_size, name);
 
     FILE* fp;
-    printf("%s\n", name);
+    log("hello %s", name);
     fp = fopen(name, "r");
 
     if (!fp) {
@@ -38,23 +38,24 @@ void cmd_dwld(int client_fd, std::string fname) {
         struct stat st;
         stat(name, &st);
         file_size = st.st_size;
-        sprintf(size_str, "%d", file_size);
+        sprintf(size_str, "%d", htonl(file_size));
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
 
     while (true) {
+        log("hello");
+        bzero(msg_buffer, BUFSIZ);
+        log("hello");
         // read from file
         if (file_size > BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
         else fread(msg_buffer, 1, file_size, fp);
         // send part of file
         _write(client_fd, msg_buffer, "Server failed to send file data\n");
         // to protect from seeking past EOF
-        if (file_size - BUFSIZ <= 0) break;
+        if (file_size < BUFSIZ) break;
         // move file pointer BUFSIZ bytes to read the next bits
         fseek(fp, BUFSIZ, SEEK_CUR);
         file_size -= BUFSIZ;
-        // clear buffer
-        bzero(msg_buffer, BUFSIZ);
     }
 
     fclose(fp);
