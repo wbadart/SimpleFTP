@@ -35,7 +35,7 @@ void cmd_dwld(int client_fd) {
         struct stat st;
         stat(name, &st);
         file_size = st.st_size;
-        sprintf(size_str, "%d", htonl(file_size));
+        sprintf(size_str, "%d", file_size);
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
 
@@ -50,7 +50,6 @@ void cmd_dwld(int client_fd) {
         // to protect from seeking past EOF
         if (file_size < BUFSIZ) break;
         // move file pointer BUFSIZ bytes to read the next bits
-        // fseek(fp, BUFSIZ-1, SEEK_CUR);
         file_size -= BUFSIZ;
     }
 
@@ -75,7 +74,7 @@ void cmd_upld(int client_fd) {
     bzero(msg_buffer, BUFSIZ);
     _read(client_fd, msg_buffer, "Failed to get file size from client\n");
 
-    file_size = ntohl(atoi(msg_buffer));
+    file_size = atoi(msg_buffer);
 
     FILE* fp;
     log("%s", name);
