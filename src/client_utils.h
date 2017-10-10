@@ -19,6 +19,7 @@
 #include <netdb.h>      // hostent, gethostbyname
 #include <stdio.h>      // fgets, fopen, fseek
 
+#include "client_commands.h"
 #include "utils.h"
 
 int usage(int status=0);

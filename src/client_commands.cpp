@@ -16,19 +16,19 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	char cmd[] = "DWLD";
 
 	// send initial message to server
-	char msg[] = "Client failed to send initial message\n";
-	_write(socket_fd, cmd, msg);
+	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
+	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
 	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
 
-	strcpy(msg, "Client failed to send file name information\n");
-	_write(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to send file name information\n");
+	_write(socket_fd, msg_buffer, error_msg);
 
 	bzero(msg_buffer, BUFSIZ);
 	// get server's response
-	strcpy(msg, "Client failed to receive file size\n");
-	_read(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to receive file size\n");
+	_read(socket_fd,msg_buffer, error_msg);
 
 	// convert the size of directory to int
 	int file_size = atoi(msg_buffer);
@@ -47,11 +47,11 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 
 	fp = fopen(file_name.c_str(), "w+");
 
-	strcpy(msg, "Client failed to receive file data\n");
+	strcpy(error_msg, "Client failed to receive file data\n");
 
 	for (i = 0; i < frames; i++) {
-		// change it so it doesnt put data in beginning of msg_buffer
-		_read(socket_fd, msg_buffer, msg);
+		// change it so it doesnt put data in beginning of error_msg_buffer
+		_read(socket_fd, msg_buffer, error_msg);
 		// write to file
 		fputs(msg_buffer, fp);
 		fseek(fp, BUFSIZ, SEEK_CUR);
@@ -66,15 +66,20 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	char cmd[] = "UPLD";
 
 	// send initial message to server
-	char msg[] = "Client failed to send initial message\n";
-	_write(socket_fd, cmd, msg);
+	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
+	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
 	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
 
 	// give server file name and size of name
-	strcpy(msg, "Client failed to send file name information\n");
-	_write(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to send file name information\n");
+	_write(socket_fd, msg_buffer, error_msg);
+
+	bzero(msg_buffer, BUFSIZ);
+
+	strcpy(error_msg, "Client failed to get response from server\n");
+	_read(socket_fd, msg_buffer, error_msg);
 
 	bzero(msg_buffer, BUFSIZ);
 
@@ -85,26 +90,33 @@ void cmd_upld(int socket_fd, std::string file_name) {
 
 	// send server file size
 	sprintf(msg_buffer, "%d", file_size);
-	strcpy(msg, "Client failed to send file size\n");
-	_write(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to send file size\n");
+	_write(socket_fd, msg_buffer, error_msg);
 
 	bzero(msg_buffer, BUFSIZ);
 
-	int frames = file_size / BUFSIZ, i;
-	if (file_size % BUFSIZ != 0 || frames == 0) frames++;
+	// check if file is empty
+	if (file_size == 0) {
+		printf("The file you selected is empty\n");
+		return;
+	}
 
 	FILE* fp;
+	fp = fopen(file_name.c_str(), "r");
 
-	fp = fopen(file_name.c_str(), "w+");
+	strcpy(error_msg, "Client failed to send file data\n");
 
-	strcpy(msg, "Client failed to receive file data\n");
-	for (i = 0; i < frames; i++) {
+	while (true) {
 		// read from file
-		fgets(msg_buffer, BUFSIZ, fp);
+		if (file_size > BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
+		else fread(msg_buffer, 1, file_size, fp);
 		// send part of file
-		_write(socket_fd, msg_buffer, msg);
+		_write(socket_fd, msg_buffer, error_msg);
+		// to protect from seeking past EOF
+		if (file_size - BUFSIZ <= 0) break;
 		// move file pointer BUFSIZ bytes to read the next bits
 		fseek(fp, BUFSIZ, SEEK_CUR);
+		file_size -= BUFSIZ;
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
 	}
@@ -116,20 +128,20 @@ void cmd_delf(int socket_fd, std::string file_name) {
 	char cmd[] = "DELF";
 
 	// send initial message to server
-	char msg[] = "Client failed to send initial message\n";
-	_write(socket_fd, cmd, msg);
+	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
+	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
 	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
 
-	strcpy(msg, "Client failed to send file name information\n");
-	_write(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to send file name information\n");
+	_write(socket_fd, msg_buffer, error_msg);
 
 	// clear buffer
 	bzero(msg_buffer, BUFSIZ);
 
-	strcpy(msg, "Client failed to receive confirmation from server\n");
-	_read(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to receive confirmation from server\n");
+	_read(socket_fd, msg_buffer, error_msg);
 
 	int response = atoi(msg_buffer);
 	if (response != 1) {
@@ -144,12 +156,12 @@ void cmd_delf(int socket_fd, std::string file_name) {
 
 	// if they respond yes, confirm deletion with server, if not cancel it
 	if (streq(msg_buffer, "Yes")) {
-		strcpy(msg, "Delete failed\n");
-		_write(socket_fd, msg_buffer, msg);
+		strcpy(error_msg, "Delete failed\n");
+		_write(socket_fd, msg_buffer, error_msg);
 	} else if (streq(msg_buffer, "No")) {
 		printf("Delete abandoned by user!\n");
-		strcpy(msg, "Delete failed\n");
-		_write(socket_fd, msg_buffer, msg);
+		strcpy(error_msg, "Delete failed\n");
+		_write(socket_fd, msg_buffer, error_msg);
 	} else {
 		printf("Sorry I did not understand that :(\n");
 	}
@@ -162,30 +174,31 @@ void cmd_list(int socket_fd) {
 	bzero(msg_buffer, BUFSIZ);
 
 	// send message to server
-	char msg[] = "Client failed to send message\n";
-	_write(socket_fd, cmd, msg);
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
+	_write(socket_fd, cmd, error_msg);
 
 	// get server's response
-	strcpy(msg, "Client failed to receive directory size\n");
-	_read(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to receive directory size\n");
+	_read(socket_fd, msg_buffer, error_msg);
 
 	// convert the size of directory to int
 	int dir_size = atoi(msg_buffer);
 	if (dir_size <= 0) {
-		strcpy(msg, "Client received an invalid directory size\n");
-		error(msg);
+		strcpy(error_msg, "Client received an invalid directory size\n");
+		error(error_msg);
 	}
 
 	// clear buffer
 	bzero(msg_buffer, BUFSIZ);
 
-	int frames = dir_size / BUFSIZ, i;
+	int frames = dir_size / BUFSIZ, i, bytes;
 	if (dir_size % BUFSIZ != 0 || frames == 0) frames++;
 
-	strcpy(msg, "Client failed to receive directory data\n");
+	strcpy(error_msg, "Client failed to receive directory data\n");
 	for (i = 0; i < frames; i++) {
 		// change it so it doesnt put data in beginning of msg_buffer
-		_read(socket_fd, msg_buffer, msg);
+		bytes = _read(socket_fd, msg_buffer, error_msg);
+		msg_buffer[bytes] = '\0';
 		printf("%s", msg_buffer);
 		bzero(msg_buffer, BUFSIZ);
 	}
@@ -195,61 +208,61 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 	char cmd[] = "MDIR";
 
 	// send message to server
-	char msg[] = "Client failed to send message\n";
-	_write(socket_fd, cmd, msg);
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
+	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
 	sprintf(msg_buffer, "%hu %s", (short int) dir_name.length(), dir_name.c_str());
 
 	// send message to server
-	_write(socket_fd, msg_buffer, msg);
+	_write(socket_fd, msg_buffer, error_msg);
 
 	bzero(msg_buffer, BUFSIZ);
 
 	// get server's response
-	strcpy(msg, "Client failed to receive directory size\n");
-	_read(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to receive directory size\n");
+	_read(socket_fd, msg_buffer, error_msg);
 
 	int response = atoi(msg_buffer);
 	if (response == 0) {
-		strcpy(msg, "Client could not parse response\n");
+		strcpy(error_msg, "Client could not parse response\n");
 	} else if (response == -1) {
-		strcpy(msg, "Error in making directory\n");
+		strcpy(error_msg, "Error in making directory\n");
 	} else if (response == -2) {
-		strcpy(msg, "The directory already exists on server\n");
+		strcpy(error_msg, "The directory already exists on server\n");
 	} else {
-		strcpy(msg, "Directory was successfully made!\n");
+		strcpy(error_msg, "Directory was successfully made!\n");
 	}
-	printf("%s", msg);
+	printf("%s", error_msg);
 }
 
 void cmd_rdir(int socket_fd, std::string dir_name) {
 	char cmd[] = "RDIR";
 
 	// send message to server
-	char msg[] = "Client failed to send message\n";
-	_write(socket_fd, cmd, msg);
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
+	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
 	sprintf(msg_buffer, "%hu %s", (short int) dir_name.length(), dir_name.c_str());
 
 	// send message to server
-	strcpy(msg, "Client failed to directory name\n");
-	_write(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to directory name\n");
+	_write(socket_fd, msg_buffer, error_msg);
 
 	// clear buffer
 	bzero(msg_buffer, BUFSIZ);
 
 	// get server's response
-	strcpy(msg, "Client failed to receive directory information\n");
-	_read(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Client failed to receive directory information\n");
+	_read(socket_fd, msg_buffer, error_msg);
 
 	int response = atoi(msg_buffer);
 	if (response <= 0) {
 		if (response == -1)
-			strcpy(msg, "The directory does not exist on server\n");
+			strcpy(error_msg, "The directory does not exist on server\n");
 		else
-			strcpy(msg, "Server responded with an invalid string\n");
+			strcpy(error_msg, "Server responded with an invalid string\n");
 		return;
 	}
 
@@ -259,12 +272,12 @@ void cmd_rdir(int socket_fd, std::string dir_name) {
 
 	// if they respond yes, confirm deletion with server, if not cancel it
 	if (streq(msg_buffer, "Yes")) {
-		strcpy(msg, "Delete failed\n");
-		_write(socket_fd, msg_buffer, msg);
+		strcpy(error_msg, "Delete failed\n");
+		_write(socket_fd, msg_buffer, error_msg);
 	} else if (streq(msg_buffer, "No")) {
 		printf("Delete abandoned by user!\n");
-		strcpy(msg, "Delete failed\n");
-		_write(socket_fd, msg_buffer, msg);
+		strcpy(error_msg, "Delete failed\n");
+		_write(socket_fd, msg_buffer, error_msg);
 	} else {
 		printf("Sorry I did not understand that :(\n");
 	}
@@ -274,27 +287,27 @@ void cmd_cdir(int socket_fd, std::string dir_name) {
 	char cmd[] = "CDIR";
 
 	// send message to server
-	char msg[] = "Client failed to send message\n";
-	_write(socket_fd, cmd, msg);
+	char error_msg[BUFSIZ] = "Client failed to send message\n";
+	_write(socket_fd, cmd, error_msg);
 
 	char msg_buffer[BUFSIZ];
 	sprintf(msg_buffer, "%hu %s", (short int) dir_name.length(), dir_name.c_str());
 
 	// send message to server
-	_write(socket_fd, msg_buffer, msg);
+	_write(socket_fd, msg_buffer, error_msg);
 
 	bzero(msg_buffer, BUFSIZ);
 
-	strcpy(msg, "Failed to get confirmation from server\n");
-	_read(socket_fd, msg_buffer, msg);
+	strcpy(error_msg, "Failed to get confirmation from server\n");
+	_read(socket_fd, msg_buffer, error_msg);
 
 	int response = atoi(msg_buffer);
 	if (response == -2) {
-		strcpy(msg, "The directory does not exist on server\n");
+		strcpy(error_msg, "The directory does not exist on server\n");
 	} else if (response == -1) {
-		strcpy(msg, "Error in changing directory\n");
+		strcpy(error_msg, "Error in changing directory\n");
 	} else if (response == 1) {
-		strcpy(msg, "Changed current directory\n");
+		strcpy(error_msg, "Changed current directory\n");
 	}
-	printf("%s", msg);
+	printf("%s", error_msg);
 }
