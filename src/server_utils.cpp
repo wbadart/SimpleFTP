@@ -134,3 +134,18 @@ bool dispatch_command(const int client_fd, const char *msg) {
 
     return quit;
 }
+
+void parse_message(char* message, int &length, char* &name) {
+    const char delim[2] = " ";
+    char* token;
+
+    token = strtok(message, delim);
+    length = atoi(token);
+    name = strtok(NULL, delim);
+}
+
+int check_file(char* file_name) {
+    struct stat st;
+    return (stat(file_name, &st) == 0);
+}
+

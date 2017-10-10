@@ -27,6 +27,7 @@ int _read(int socket_fd, char* message, char error_msg[BUFSIZ]) {
 	if (bytes == -1) {
 		error(error_msg);
 	}
+    message[bytes] = '\0';
     return bytes;
 }
 

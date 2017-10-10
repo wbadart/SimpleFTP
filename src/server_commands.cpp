@@ -13,7 +13,51 @@
 #include "server_commands.h"
 
 void cmd_dwld(int client_fd, std::string fname) {
-    write(client_fd, "DWLD\n", strlen("DWLD\n"));
+
+    char msg_buffer[BUFSIZ];
+    _read(client_fd, msg_buffer, "Failed to get file information\n");
+
+    int name_size = 0, file_size;
+    char* name, size_str[10];
+
+    parse_message(msg_buffer, name_size, name);
+    printf("%d - %s\n", name_size, name);
+
+    bzero(msg_buffer, BUFSIZ);
+
+    FILE* fp;
+    printf("%s\n", name);
+    fp = fopen(name, "r");
+
+    if (!fp) {
+        printf("File doesnt exist\n");
+        _write(client_fd, "-1", "Failed to send message about the file not existing\n");
+        return;
+    } else {
+        // get the file size
+        struct stat st;
+        stat(name, &st);
+        file_size = st.st_size;
+        sprintf(size_str, "%d", file_size);
+        _write(client_fd, size_str, "Failed to send message about the file existing\n");
+    }
+
+    while (true) {
+        // read from file
+        if (file_size > BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
+        else fread(msg_buffer, 1, file_size, fp);
+        // send part of file
+        _write(client_fd, msg_buffer, "Server failed to send file data\n");
+        // to protect from seeking past EOF
+        if (file_size - BUFSIZ <= 0) break;
+        // move file pointer BUFSIZ bytes to read the next bits
+        fseek(fp, BUFSIZ, SEEK_CUR);
+        file_size -= BUFSIZ;
+        // clear buffer
+        bzero(msg_buffer, BUFSIZ);
+    }
+
+    fclose(fp);
 }
 
 
@@ -23,60 +67,59 @@ void cmd_upld(int client_fd, std::string fname) {
 
 
 void cmd_delf(int client_fd, std::string fname) {
-    write(client_fd, "DELF\n", strlen("DWLD\n"));
+    if(remove(fname.c_str()) < 0) _write(
+        client_fd, "Unable to remove file", "Couldn't report DELF failure");
+    else _write(
+        client_fd, "File successfully removed", "Couldn't report DELF success");
 }
 
 
 void cmd_list(int client_fd) {
-    //write(client_fd, "LIST\n", strlen("DWLD\n"));
-
     DIR *d = opendir(".");
+
     if(d == NULL)
         error("Couldn't open working directory");
 
-    char buffer[] = "";
-    //strcpy(buffer, "");
+    char buffer[BUFSIZ];
+    strcpy(buffer, "");
 
     struct dirent *e;
     struct stat statbuf;
     std::string perm_string;
 
     while((e = readdir(d))) {
+
         log("Found dir entity: %s", e->d_name);
         // d_name gives us the null-terminated filename
-        printf("here\n");
-        fflush(stdout);
-        if(streq(e->d_name, ".") || streq(e->d_name, ".."))
+        if(streq(e->d_name, ".") || streq(e->d_name, "..")) {
             continue;
-        else{
+        } else {
         	stat(e->d_name,&statbuf);
         	perm_string = permissions_string(statbuf);
             log("%s", perm_string.c_str());
-        	/*
-        	char *ls_cmd;
-        	char *name = e->d_name;
-        	name[strlen(name)-1] = '\0';
-        	sprintf(ls_cmd,"ls %s", e);
-        	char *mesg = system(ls_cmd);
-        	printf("Message = %s\n", mesg);
-        	*/
         }
 
-        sprintf(buffer, "%s%s %s\n", buffer,perm_string.c_str(),e->d_name);
-        // strcat(buffer, perm_string.c_str());
-        // strcat(buffer, " ");
-        // strcat(buffer, e->d_name);
-        // strcat(buffer, "\n");
-        log("Buffer: %s", buffer);
+        strcat(buffer, perm_string.c_str());
+        strcat(buffer, " ");
+        strcat(buffer, e->d_name);
+        strcat(buffer, "\n");
 
-        	//count the size of the message
-
-        	//send size of message
-
-        	//send message 
     }
-    log("hi there\n");
-        // Stat...
+    closedir(d);
+    printf("%s", buffer);
+
+    char msg[BUFSIZ];
+    int buffer_size = strlen(buffer);
+    sprintf(msg, "%d", buffer_size);
+    _write(client_fd, msg, "Failed to send buffer size\n");
+
+    _write(client_fd, buffer, "Failed to send buffer data\n");
+
+    // while (true) {
+    //     if (buffer_size > BUFSIZ) {
+    //         _write(client_fd, )
+    //     }
+    // }
 }
 
 

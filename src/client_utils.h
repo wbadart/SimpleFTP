@@ -18,6 +18,7 @@
 #include <sys/types.h>  // PF_INET, SOCK_STREAM
 #include <netdb.h>      // hostent, gethostbyname
 #include <stdio.h>      // fgets, fopen, fseek
+#include <sstream>      // sstream
 
 #include "client_commands.h"
 #include "utils.h"
