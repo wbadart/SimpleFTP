@@ -50,7 +50,7 @@ void cmd_dwld(int client_fd) {
         _write(client_fd, msg_buffer, "Server failed to send file data\n");
         // to protect from seeking past EOF
         if (file_size < BUFSIZ) {
-            _write(socket_fd, msg_buffer, "Client failed to receive file data\n");
+            _write(client_fd, msg_buffer, "Client failed to receive file data\n");
             fputs(msg_buffer, fp);
             break;
         }
