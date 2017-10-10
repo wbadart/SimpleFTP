@@ -50,7 +50,7 @@ void cmd_dwld(int client_fd) {
         // to protect from seeking past EOF
         if (file_size < BUFSIZ) break;
         // move file pointer BUFSIZ bytes to read the next bits
-        fseek(fp, BUFSIZ, SEEK_CUR);
+        // fseek(fp, BUFSIZ-1, SEEK_CUR);
         file_size -= BUFSIZ;
     }
 
