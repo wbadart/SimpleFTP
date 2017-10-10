@@ -90,21 +90,28 @@ void cmd_upld(int socket_fd, std::string file_name) {
 
 	bzero(msg_buffer, BUFSIZ);
 
-	int frames = file_size / BUFSIZ, i;
-	if (file_size % BUFSIZ != 0 || frames == 0) frames++;
+	// check if file is empty
+	if (file_size == 0) {
+		printf("The file you selected is empty\n");
+		return;
+	}
 
 	FILE* fp;
+	fp = fopen(file_name.c_str(), "r");
 
-	fp = fopen(file_name.c_str(), "w+");
+	strcpy(msg, "Client failed to send file data\n");
 
-	strcpy(msg, "Client failed to receive file data\n");
-	for (i = 0; i < frames; i++) {
+	while (true) {
 		// read from file
 		fgets(msg_buffer, BUFSIZ, fp);
 		// send part of file
 		_write(socket_fd, msg_buffer, msg);
+		// to protect from seeking past EOF
+		if (file_size < BUFSIZ)
+			break;
 		// move file pointer BUFSIZ bytes to read the next bits
 		fseek(fp, BUFSIZ, SEEK_CUR);
+		file_size -= BUFSIZ;
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
 	}

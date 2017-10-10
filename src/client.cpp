@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 		char msg[] = "Failed to connect to server\n";
 		error(msg);
 	}
-	std::string name;
+	std::string name, cmd;
 	char dir_name[BUFSIZ];
 
 	bool quit = false;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 		printf("%s", prompt);
 		fgets(msg_buffer, BUFSIZ, stdin);
 		// strip the end of line off of the command
-		std::string cmd = strip(msg_buffer);
+		cmd = strip(msg_buffer);
 		// check the command and do respective action(s)
 		if (CMD_LABELS.count(cmd) > 0) {
 			switch (CMD_LABELS.at(cmd)) {
@@ -72,7 +72,11 @@ int main(int argc, char *argv[]) {
 					break;
 
 				case Command::UPLD:
-					// cmd_upld()
+					// get name of file to upload
+					fgets(dir_name, BUFSIZ, stdin);
+					name = strip(dir_name);
+					cmd_upld(socket_fd, name);
+					bzero(dir_name, BUFSIZ);
 					break;
 
 				case Command::DELF:
@@ -81,6 +85,8 @@ int main(int argc, char *argv[]) {
 					name = strip(dir_name);
 					cmd_mdir(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
+					printf("hi");
+					fflush(stdout);
 					break;
 
 				case Command::LIST:
