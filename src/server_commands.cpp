@@ -236,7 +236,18 @@ void cmd_rdir(int client_fd) {
 
 
 void cmd_cdir(int client_fd) {
-    write(client_fd, "CDIR\n", strlen("DWLD\n"));
+    char msg[BUFSIZ];
+    _read(client_fd, msg, "Failed to read name and name length");
+
+    // Get len(dirname) and dirname
+    uint16_t dname_len = 0;
+    char dname[BUFSIZ];
+    parse_message(msg, dname_len, dname);
+
+    // Attempt chdir and report
+    if(chdir(dname) == 0)
+        _write(client_fd, "1", "Couldn't report CDIR success");
+    else _write(client_fd, "-2", "Couldn't report CDIR failure");
 }
 
 /*
