@@ -178,7 +178,7 @@ void cmd_mdir(int client_fd) {
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
     uint16_t len = 0;
-    char *dir_name;
+    char dir_name[BUFSIZ];
 
     parse_message(msg_buffer, len, dir_name);
 
