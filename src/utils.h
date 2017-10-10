@@ -62,3 +62,6 @@ void log(char *fmt, ...);
 
 // Convert std::string to lowercase
 std::string str2lower(std::string s);
+
+// Return permissions string from stat struct
+std::string permissions_string(struct stat st);

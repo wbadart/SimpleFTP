@@ -61,3 +61,19 @@ std::string str2lower(std::string s) {
         );
     return s;
 }
+
+std::string permissions_string(struct stat st) {
+    std::string perm_str;
+    perm_str.append( (S_ISDIR(st.st_mode)) ? "d" : "-");
+    perm_str.append( (st.st_mode & S_IRUSR) ? "r" : "-");
+    perm_str.append( (st.st_mode & S_IWUSR) ? "w" : "-");
+    perm_str.append( (st.st_mode & S_IXUSR) ? "x" : "-");
+    perm_str.append( (st.st_mode & S_IRGRP) ? "r" : "-");
+    perm_str.append( (st.st_mode & S_IWGRP) ? "w" : "-");
+    perm_str.append( (st.st_mode & S_IXGRP) ? "x" : "-");
+    perm_str.append( (st.st_mode & S_IROTH) ? "r" : "-");
+    perm_str.append( (st.st_mode & S_IWOTH) ? "w" : "-");
+    perm_str.append( (st.st_mode & S_IXOTH) ? "x" : "-");
+    
+    return perm_str;
+}
