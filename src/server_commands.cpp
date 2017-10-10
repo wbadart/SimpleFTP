@@ -18,7 +18,7 @@ void cmd_dwld(int client_fd) {
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
     uint16_t name_size = 0;
-    uint32_t file_size = 0;
+    int file_size = 0;
     char name[100], size_str[10];
 
     parse_message(msg_buffer, name_size, name);
@@ -44,7 +44,7 @@ void cmd_dwld(int client_fd) {
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
         // read from file
-        if (file_size > BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
+        if (file_size >= BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
         else fread(msg_buffer, 1, file_size, fp);
         // send part of file
         _write(client_fd, msg_buffer, "Server failed to send file data\n");

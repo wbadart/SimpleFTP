@@ -31,6 +31,15 @@ int _read(int socket_fd, char* message, char error_msg[BUFSIZ]) {
     return bytes;
 }
 
+int _read(int socket_fd, char* message, char error_msg[BUFSIZ], int sz) {
+    int bytes = read(socket_fd, message, sz);
+    if (bytes == -1) {
+        error(error_msg);
+    }
+    message[bytes] = '\0';
+    return bytes;
+}
+
 void error(char *fmt, ...) {
     va_list args;
     char msg[BUFSIZ], *prefix = "ERROR: ";

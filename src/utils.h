@@ -25,6 +25,7 @@
 #include <sys/socket.h> // socket, connect, send, recv
 #include <unistd.h>     // read, write
 
+#define BUFSIZ 1024
 
 #define streq(a, b) (strncmp(a, b, BUFSIZ)==0)
 
@@ -54,6 +55,8 @@ int _write(int socket_fd, char* message, char* error_msg);
 
 // wrapper for read()
 int _read(int socket_fd, char* message, char* error_msg);
+
+int _read(int socket_fd, char* message, char* error_msg, int sz);
 
 // Report error and exit with status
 void error(char *fmt, ...);
