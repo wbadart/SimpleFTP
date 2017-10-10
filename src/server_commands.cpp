@@ -12,7 +12,6 @@
 
 #include "server_commands.h"
 
-
 void cmd_dwld(int client_fd, std::string fname) {
     write(client_fd, "DWLD\n", strlen("DWLD\n"));
 }
@@ -52,6 +51,7 @@ void cmd_list(int client_fd) {
         else{
         	stat(e->d_name,&statbuf);
         	perm_string = permissions_string(statbuf);
+            log("%s", perm_string.c_str());
         	/*
         	char *ls_cmd;
         	char *name = e->d_name;
@@ -67,7 +67,7 @@ void cmd_list(int client_fd) {
         // strcat(buffer, " ");
         // strcat(buffer, e->d_name);
         // strcat(buffer, "\n");
-        printf("Buffer: %s", buffer);
+        log("Buffer: %s", buffer);
 
         	//count the size of the message
 
@@ -75,6 +75,7 @@ void cmd_list(int client_fd) {
 
         	//send message 
     }
+    log("hi there\n");
         // Stat...
 }
 

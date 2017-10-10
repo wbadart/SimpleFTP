@@ -13,7 +13,7 @@
 #include "client_commands.h"
 
 void cmd_dwld(int socket_fd, std::string file_name) {
-	char cmd[] = "DWLD";
+	char cmd[] = "dwld";
 
 	// send initial message to server
 	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
@@ -63,7 +63,7 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 }
 
 void cmd_upld(int socket_fd, std::string file_name) {
-	char cmd[] = "UPLD";
+	char cmd[] = "upld";
 
 	// send initial message to server
 	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
@@ -125,7 +125,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 }
 
 void cmd_delf(int socket_fd, std::string file_name) {
-	char cmd[] = "DELF";
+	char cmd[] = "delf";
 
 	// send initial message to server
 	char error_msg[BUFSIZ] = "Client failed to send initial message\n";
@@ -168,7 +168,7 @@ void cmd_delf(int socket_fd, std::string file_name) {
 }
 
 void cmd_list(int socket_fd) {
-	char cmd[] = "LIST";
+	char cmd[] = "list";
 
 	char msg_buffer[BUFSIZ];
 	bzero(msg_buffer, BUFSIZ);
@@ -205,7 +205,7 @@ void cmd_list(int socket_fd) {
 }
 
 void cmd_mdir(int socket_fd, std::string dir_name) {
-	char cmd[] = "MDIR";
+	char cmd[] = "mdir";
 
 	// send message to server
 	char error_msg[BUFSIZ] = "Client failed to send message\n";
@@ -237,7 +237,7 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 }
 
 void cmd_rdir(int socket_fd, std::string dir_name) {
-	char cmd[] = "RDIR";
+	char cmd[] = "rdir";
 
 	// send message to server
 	char error_msg[BUFSIZ] = "Client failed to send message\n";
@@ -284,7 +284,7 @@ void cmd_rdir(int socket_fd, std::string dir_name) {
 }
 
 void cmd_cdir(int socket_fd, std::string dir_name) {
-	char cmd[] = "CDIR";
+	char cmd[] = "cdir";
 
 	// send message to server
 	char error_msg[BUFSIZ] = "Client failed to send message\n";
