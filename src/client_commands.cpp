@@ -30,6 +30,7 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 
 	// convert the size of directory to int
 	uint32_t file_size = atoi(msg_buffer);
+	printf("%s\n", msg_buffer);
 	if (file_size == -1 || file_size == 0) {
 		printf("File does not exist on server\n");
 		return;
@@ -52,7 +53,11 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 		_read(socket_fd, msg_buffer, "Client failed to receive file data\n");
 		// write to file
 		fputs(msg_buffer, fp);
-		if (file_size < BUFSIZ) break;
+		if (file_size < BUFSIZ) {
+			_read(socket_fd, msg_buffer, "Client failed to receive file data\n");
+			fputs(msg_buffer, fp);
+			break;
+		}
 		file_size -= BUFSIZ;
 	}
 	gettimeofday(&end, NULL);
