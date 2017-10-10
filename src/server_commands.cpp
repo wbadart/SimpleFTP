@@ -58,7 +58,7 @@ void cmd_dwld(int client_fd) {
 }
 
 
-void cmd_upld(int client_fd, std::string fname) {
+void cmd_upld(int client_fd) {
 
     char msg_buffer[BUFSIZ];
     _read(client_fd, msg_buffer, "Failed to get file information\n");
@@ -178,7 +178,7 @@ void cmd_mdir(int client_fd) {
     uint16_t len;
     char *dir_name;
 
-    parse_message(fname.c_str(), &len, dir_name);
+    // parse_message(fname.c_str(), &len, dir_name);
 
     struct stat st;
     char *msg;
