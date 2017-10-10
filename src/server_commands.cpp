@@ -174,25 +174,29 @@ void cmd_list(int client_fd) {
 
 
 void cmd_mdir(int client_fd) {
-    write(client_fd, "MDIR\n", strlen("DWLD\n"));
-    uint16_t len;
+	char msg_buffer[BUFSIZ];
+    _read(client_fd, msg_buffer, "Failed to get file information\n");
+
+    uint16_t len = 0;
     char *dir_name;
 
-    // parse_message(fname.c_str(), &len, dir_name);
+    parse_message(msg_buffer, len, dir_name);
 
     struct stat st;
-    char *msg;
 	if (stat(dir_name, &st) == -1) {
     	if( (mkdir(dir_name, 0700)) == -1){
-    		sprintf(msg,"%d",-1);
-    		_write(client_fd,msg,"Failed to send directory failed to create message");
+    		printf("dir_name: %s\n", dir_name);
+    		printf("failed\n");
+    		_write(client_fd,"-1","Failed to send directory failed to create message");
     	} else {
-    		sprintf(msg,"%d",1);
-    		_write(client_fd,msg,"Failed to send directory creation confirmation");
+    		printf("dir_name: %s", dir_name);
+    		printf("made directory\n");
+    		printf("here\n");
+    		_write(client_fd,"1","Failed to send directory creation confirmation");
     	}
     } else{
-		sprintf(msg,"%d",-2);
-    	_write(client_fd, msg, "Failed to send directory exists message");
+    	printf("already exists!\n");
+    	_write(client_fd, "-2", "Failed to send directory exists message");
 	}
 
 }
