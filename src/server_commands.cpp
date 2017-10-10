@@ -99,7 +99,7 @@ void cmd_delf(int client_fd) {
     _read(client_fd, msg, "Failed to read name and name length");
 
     // Get len(filename) and filename
-    uint16_t fname_len = 0; uint32_t file_len;
+    uint16_t fname_len = 0; uint32_t file_len = 0;
     char *fname;
     parse_message(msg, fname_len, fname);
 
