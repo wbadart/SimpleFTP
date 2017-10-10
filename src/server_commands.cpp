@@ -63,9 +63,18 @@ void cmd_list(int client_fd) {
     closedir(d);
     printf("%s", buffer);
 
-    char* msg;
-    sprintf(msg, "%d", strlen(buffer));
-    _write(client_fd, msg, "hello");
+    char msg[BUFSIZ];
+    int buffer_size = strlen(buffer);
+    sprintf(msg, "%d", buffer_size);
+    _write(client_fd, msg, "Failed to send buffer size\n");
+
+    _write(client_fd, buffer, "Failed to send buffer data\n");
+
+    // while (true) {
+    //     if (buffer_size > BUFSIZ) {
+    //         _write(client_fd, )
+    //     }
+    // }
 }
 
 
