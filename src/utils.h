@@ -56,6 +56,8 @@ int _write(int socket_fd, char* message, char* error_msg);
 // wrapper for read()
 int _read(int socket_fd, char* message, char* error_msg);
 
+int _read(int socket_fd, char* message, char* error_msg, int sz);
+
 // Report error and exit with status
 void error(char *fmt, ...);
 
