@@ -22,8 +22,7 @@ int main(int argc, char *argv[]) {
 	struct hostent* hp;
 	hp = gethostbyname(argv[1]);
 	if (!hp) {
-		char msg[] = "Host cannot be found\n";
-		error(msg);
+		error("Host %s cannot be found\n", argv[1]);
 	}
 
 	// buffer for sending and receiving messages
@@ -37,10 +36,12 @@ int main(int argc, char *argv[]) {
 
 	bzero((char*)&sin, sizeof(sin));
 	sin.sin_family = AF_INET;
+	bcopy((char *)hp->h_addr, 
+	  (char *)&sin.sin_addr.s_addr, hp->h_length);
 	sin.sin_port = htons(atoi(argv[2]));
 
 	// create socket
-	if ((socket_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+	if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		char msg[] = "Failed to create socket\n";
 		error(msg);
 	}
@@ -50,6 +51,7 @@ int main(int argc, char *argv[]) {
 		char msg[] = "Failed to connect to server\n";
 		error(msg);
 	}
+
 	std::string name, cmd, msg;
 	std::string msg_str, cmd_str, fname;
     std::stringstream msg_ss;

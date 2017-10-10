@@ -19,9 +19,9 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
+	uint16_t file_length = htons(file_name.length());
+	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
 
-	printf("%s\n", msg_buffer);
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
 
 	bzero(msg_buffer, BUFSIZ);
@@ -29,33 +29,37 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	_read(socket_fd, msg_buffer, "Client failed to receive file size\n");
 
 	// convert the size of directory to int
-	printf("BUFFER: %s\n", msg_buffer);
-	int file_size = atoi(msg_buffer);
+	uint32_t file_size = ntohl(atoi(msg_buffer));
 	if (file_size == -1 || file_size == 0) {
 		printf("File does not exist on server\n");
 		return;
 	}
 
-	// clear buffer
-	bzero(msg_buffer, BUFSIZ);
-
-	int frames = file_size / BUFSIZ, i;
-	if (file_size % BUFSIZ != 0) frames++;
+	int original_size = file_size;
 
 	FILE* fp;
-
 	fp = fopen(file_name.c_str(), "w+");
 
-	for (i = 0; i < frames; i++) {
-		// change it so it doesnt put data in beginning of error_msg_buffer
+	struct timeval start, end;
+
+	gettimeofday(&start, NULL);
+	while (true) {
+		// clear buffer
+		bzero(msg_buffer, BUFSIZ);
 		_read(socket_fd, msg_buffer, "Client failed to receive file data\n");
 		// write to file
 		fputs(msg_buffer, fp);
+		if (file_size < BUFSIZ) break;
+		file_size -= BUFSIZ;
 		fseek(fp, BUFSIZ, SEEK_CUR);
-		// clear buffer
-		bzero(msg_buffer, BUFSIZ);
 	}
+	gettimeofday(&end, NULL);
 
+	float time_elap = (end.tv_usec - start.tv_usec) / 1000000.0;
+	float mbps = original_size / time_elap / 1000000.0;
+
+	printf("%d bytes transferred in %7.5f seconds: %3.2f Megabytes/s\n", 
+		original_size, time_elap, mbps);
 	fclose(fp);
 }
 
@@ -66,7 +70,8 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
+	uint16_t file_length = htons(file_name.length());
+	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
 
 	// give server file name and size of name
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
@@ -74,16 +79,19 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	bzero(msg_buffer, BUFSIZ);
 
 	_read(socket_fd, msg_buffer, "Client failed to get response from server\n");
+	if (atoi(msg_buffer) != 1)
+		error("Failed to get response from upload command\n");
 
 	bzero(msg_buffer, BUFSIZ);
 
 	// get the file size
 	struct stat st;
 	stat(file_name.c_str(), &st);
-	int file_size = st.st_size;
+	int original_size = st.st_size;
+	uint32_t file_size = htonl(st.st_size);
 
 	// send server file size
-	sprintf(msg_buffer, "%d", file_size);
+	sprintf(msg_buffer, "%u", file_size);
 	_write(socket_fd, msg_buffer, "Client failed to send file size\n");
 
 	bzero(msg_buffer, BUFSIZ);
@@ -96,6 +104,9 @@ void cmd_upld(int socket_fd, std::string file_name) {
 
 	FILE* fp;
 	fp = fopen(file_name.c_str(), "r");
+
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
 
 	while (true) {
 		// read from file
@@ -111,6 +122,14 @@ void cmd_upld(int socket_fd, std::string file_name) {
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
 	}
+	gettimeofday(&end, NULL);
+
+	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)
+		  - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0;
+	float mbps = original_size / time_elap / 1000000.0;
+
+	printf("%d bytes transferred in %7.5f seconds: %8.5f Megabytes/s\n", 
+		original_size, time_elap, mbps);
 
 	fclose(fp);
 }
@@ -186,7 +205,8 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 	_write(socket_fd, cmd, "Client failed to send message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) dir_name.length(), dir_name.c_str());
+	uint16_t file_length = htons(dir_name.length());
+	sprintf(msg_buffer, "%u %s", file_length, dir_name.c_str());
 
 	// send message to server
 	_write(socket_fd, msg_buffer, "Client failed to send directory name");
@@ -194,7 +214,7 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 	bzero(msg_buffer, BUFSIZ);
 
 	// get server's response
-	_read(socket_fd, msg_buffer, "Client failed to receive directory size\n");
+	_read(socket_fd, msg_buffer, "Client failed to receive if directory exists\n");
 
 	int response = atoi(msg_buffer);
 	if (response == 0) {
