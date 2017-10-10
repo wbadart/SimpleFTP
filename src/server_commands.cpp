@@ -24,7 +24,10 @@ void cmd_upld(int client_fd, std::string fname) {
 
 
 void cmd_delf(int client_fd, std::string fname) {
-    write(client_fd, "DELF\n", strlen("DWLD\n"));
+    if(remove(fname.c_str()) < 0) _write(
+        client_fd, "Unable to remove file", "Couldn't report DELF failure");
+    else _write(
+        client_fd, "File successfully removed", "Couldn't report DELF success");
 }
 
 
@@ -73,7 +76,7 @@ void cmd_list(int client_fd) {
 
         	//send size of message
 
-        	//send message 
+        	//send message
     }
         // Stat...
 }
