@@ -90,7 +90,6 @@ void cmd_upld(int client_fd) {
         file_size -= BUFSIZ;
     }
     fclose(fp);
-
 }
 
 
@@ -99,7 +98,7 @@ void cmd_delf(int client_fd) {
     _read(client_fd, msg, "Failed to read name and name length");
 
     // Get len(filename) and filename
-    uint16_t fname_len = 0; uint32_t file_len = 0;
+    uint16_t fname_len = 0; // uint32_t file_len = 0;
     char fname[BUFSIZ];
     parse_message(msg, fname_len, fname);
 
@@ -146,7 +145,6 @@ void cmd_list(int client_fd) {
         } else {
         	stat(e->d_name,&statbuf);
         	perm_string = permissions_string(statbuf);
-            log("%s", perm_string.c_str());
         }
 
         strcat(buffer, perm_string.c_str());
@@ -156,13 +154,13 @@ void cmd_list(int client_fd) {
 
     }
     closedir(d);
-    printf("%s", buffer);
 
     char msg[BUFSIZ];
     int buffer_size = strlen(buffer);
     sprintf(msg, "%d", buffer_size);
     _write(client_fd, msg, "Failed to send buffer size\n");
 
+    // @TODO: make this so it can send more than once
     _write(client_fd, buffer, "Failed to send buffer data\n");
 
     // while (true) {
@@ -192,7 +190,6 @@ void cmd_mdir(int client_fd) {
     } else{
     	_write(client_fd, "-2", "Failed to send directory exists message");
 	}
-
 }
 
 
@@ -243,73 +240,3 @@ void cmd_cdir(int client_fd) {
         _write(client_fd, "1", "Couldn't report CDIR success");
     else _write(client_fd, "-2", "Couldn't report CDIR failure");
 }
-
-/*
-void scan_directory(const char *root, const time_t timestamp) {
-    DIR *d = opendir(root);
-    if (d == NULL) {
-        fprintf(stderr, "Unable to opendir %s: %s\n", root, strerror(errno));
-    	return;
-    }
-
-    struct dirent *e;
-    while ((e = readdir(d))) {
-    	char fullpath[PATH_MAX];
-
-    	if (streq(e->d_name, ".") || streq(e->d_name, ".."))
-    	    continue;
-
-        snprintf(fullpath, PATH_MAX, "%s/%s", root, e->d_name);
-
-    	switch (e->d_type) {
-	    case DT_REG: scan_file(fullpath, timestamp);      break;
-	}
-    }
-    closedir(d);
-}
-
-// Scan file -------------------------------------------------------------------
-//
-//  1. Stat the file
-//  2. If file is not in Files cache, then add it and execute rules for CREATE event
-//  3. If mtime does not match, then set mtime and execute rules for MODIFY event
-
-void scan_file(const char *path, const time_t timestamp) {
-    struct stat s;
-
-    if (stat(path, &s) < 0) {
-        fprintf(stderr, "Unable to stat %s: %s\n", path, strerror(errno));
-    	return;
-    }
-
-    if (Files.count(path) == 0) {
-    	Files[path] = {s.st_mtime, timestamp};
-	exec_rules(path, CREATE_EVENT, timestamp);
-    }
-
-    if (Files[path].mtime != s.st_mtime) {
-	Files[path].mtime = s.st_mtime;
-	exec_rules(path, MODIFY_EVENT, timestamp);
-    }
-
-    Files[path].timestamp = timestamp;
-}
-
-// Scan timestamps -------------------------------------------------------------
-//
-//  Walk all the files in cache
-//	If file timestamp does not match current timestamp, then execute rules
-//	for DELETE event and remove file.
-
-void scan_timestamps(const time_t timestamp) {
-    for (auto it = Files.begin(); it != Files.end(); ) {
-        if (it->second.timestamp != timestamp) {
-            exec_rules(it->first.c_str(), DELETE_EVENT, timestamp);
-            Files.erase(it++);
-        } else {
-            it++;
-        }
-    }
-}
-
-*/
