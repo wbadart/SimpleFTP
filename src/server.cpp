@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
 
         // Read messages
         char msg[BUFSIZ]; int msg_len = 0;
+        bzero(msg, sizeof(msg));
         while((msg_len = read(client_fd, msg, sizeof(msg))) > 0) {
             log("client message: >>%s<<", msg);
             // Inspect `msg' and run command. Sets `response'
@@ -40,6 +41,7 @@ int main(int argc, char *argv[]) {
                 msg_len = 0;  // Trigger "Client done"
                 break;
             }
+            bzero(msg, sizeof(msg));
         }
 
         // Handle client finishing

@@ -19,6 +19,7 @@
 #include <netdb.h>      // hostent, gethostbyname
 #include <stdio.h>      // fgets, fopen, fseek
 #include <sstream>      // sstream
+#include <sys/time.h>   // gettimeofday
 
 #include "client_commands.h"
 #include "utils.h"

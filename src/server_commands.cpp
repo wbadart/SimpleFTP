@@ -19,7 +19,7 @@ void cmd_dwld(int client_fd) {
 
     uint16_t name_size = 0;
     uint32_t file_size = 0;
-    char* name, size_str[10];
+    char name[100], size_str[10];
 
     parse_message(msg_buffer, name_size, name);
 
@@ -65,11 +65,10 @@ void cmd_upld(int client_fd) {
 
     uint16_t name_size = 0;
     uint32_t file_size = 0;
-    char* name;
-
+    char name[100];
+    log("%s", msg_buffer);
     parse_message(msg_buffer, name_size, name);
-    char* name2 = nullptr;
-    strcpy(name2, name);
+    log("%d %s", name_size, name);
 
     _write(client_fd, "1", "Failed to send upload confirmation\n");
 
@@ -79,7 +78,8 @@ void cmd_upld(int client_fd) {
     file_size = ntohl(atoi(msg_buffer));
 
     FILE* fp;
-    fp = fopen(name2, "w+");
+    log("%s", name);
+    fp = fopen(name, "w+");
 
     while (true) {
         bzero(msg_buffer, BUFSIZ);
