@@ -68,7 +68,7 @@ void cmd_upld(int client_fd, std::string fname) {
     char* name;
 
     parse_message(msg_buffer, name_size, name);
-    char* name2;
+    char* name2 = nullptr;
     strcpy(name2, name);
 
     _write(client_fd, "1", "Failed to send upload confirmation\n");

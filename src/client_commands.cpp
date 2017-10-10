@@ -182,7 +182,8 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 	_write(socket_fd, cmd, "Client failed to send message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) dir_name.length(), dir_name.c_str());
+	uint16_t file_length = htons(dir_name.length());
+	sprintf(msg_buffer, "%u %s", file_length, dir_name.c_str());
 
 	// send message to server
 	_write(socket_fd, msg_buffer, "Client failed to send directory name");
@@ -190,7 +191,7 @@ void cmd_mdir(int socket_fd, std::string dir_name) {
 	bzero(msg_buffer, BUFSIZ);
 
 	// get server's response
-	_read(socket_fd, msg_buffer, "Client failed to receive directory size\n");
+	_read(socket_fd, msg_buffer, "Client failed to receive if directory exists\n");
 
 	int response = atoi(msg_buffer);
 	if (response == 0) {
