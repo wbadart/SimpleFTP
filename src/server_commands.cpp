@@ -82,7 +82,6 @@ void cmd_upld(int client_fd) {
 
     while (true) {
         bytes = _read(client_fd, msg_buffer, "Client failed to receive file data\n");
-        log("%d", bytes);
         if (bytes == 0) break;
         if (bytes < BUFSIZ) {
             fwrite(msg_buffer, bytes, 1, fp);

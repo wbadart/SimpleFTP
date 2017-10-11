@@ -120,13 +120,11 @@ void cmd_upld(int socket_fd, std::string file_name) {
         if (bytes < BUFSIZ) {
             bytes = _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
             total += bytes;
-            log("%d", total);
             break;
         }
         // send part of file
         bytes = _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
         total += bytes;
-        log("%d", total);
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
     }
