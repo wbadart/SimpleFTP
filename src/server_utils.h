@@ -50,7 +50,7 @@ int accept_client(
 bool dispatch_command(const int client_fd, const char *msg);
 
 // parsing the file size, file name format
-void parse_message(char* message, uint16_t &length, char* name);
+void parse_message(char* message, int &length, char* name);
 
 // check if a file exists in the current directory
 int check_file(char* file_name);

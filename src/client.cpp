@@ -121,7 +121,6 @@ int main(int argc, char *argv[]) {
 
 				default:
 					printf("Unknown command\n");
-					continue;
 			}
 		}
 
