@@ -17,7 +17,7 @@ void cmd_dwld(int client_fd) {
     char msg_buffer[BUFSIZ];
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
-    uint16_t name_size = 0;
+    int name_size = 0;
     int file_size = 0;
     char name[100], size_str[10];
 
@@ -40,23 +40,21 @@ void cmd_dwld(int client_fd) {
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
 
-    while (true) {
+    while (file_size > BUFSIZ) {
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
         // read from file
-        if (file_size >= BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
-        else fread(msg_buffer, 1, file_size, fp);
+        fread(msg_buffer, 1, BUFSIZ, fp);
+        file_size -= BUFSIZ;
         // send part of file
         _write(client_fd, msg_buffer, "Server failed to send file data\n");
-        // to protect from seeking past EOF
-        if (file_size < BUFSIZ) {
-            _write(client_fd, msg_buffer, "Client failed to receive file data\n");
-            fputs(msg_buffer, fp);
-            break;
-        }
-        // move file pointer BUFSIZ bytes to read the next bits
-        file_size -= BUFSIZ;
     }
+    if (file_size > 0) {
+        bzero(msg_buffer, BUFSIZ);
+        fread(msg_buffer, 1, file_size, fp);
+        _write(client_fd, msg_buffer, "Server failed to send file data\n");
+    }
+    bzero(msg_buffer, BUFSIZ);
 
     fclose(fp);
 }
@@ -67,8 +65,8 @@ void cmd_upld(int client_fd) {
     char msg_buffer[BUFSIZ];
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
-    uint16_t name_size = 0;
-    uint32_t file_size = 0;
+    int name_size = 0;
+    int file_size = 0;
     char name[100];
     log("%s", msg_buffer);
     parse_message(msg_buffer, name_size, name);
@@ -80,19 +78,27 @@ void cmd_upld(int client_fd) {
     _read(client_fd, msg_buffer, "Failed to get file size from client\n");
 
     file_size = atoi(msg_buffer);
+    log("%d", file_size);
 
     FILE* fp;
     log("%s", name);
-    fp = fopen(name, "w+");
+    fp = fopen(name, "w");
 
-    while (true) {
+    while (file_size > BUFSIZ) {
         bzero(msg_buffer, BUFSIZ);
         _read(client_fd, msg_buffer, "Failed to get file data from client\n");
+        log("%d", strlen(msg_buffer));
         fputs(msg_buffer, fp);
-        if (file_size <= BUFSIZ) break;
-        fseek(fp, BUFSIZ, SEEK_CUR);
         file_size -= BUFSIZ;
     }
+    if (file_size > 0) {
+        bzero(msg_buffer, BUFSIZ);
+        _read(client_fd, msg_buffer, "Failed to get file data from client\n", file_size);
+        log("%d", strlen(msg_buffer));
+        fputs(msg_buffer, fp);
+    }
+    bzero(msg_buffer, BUFSIZ);
+
     fclose(fp);
 }
 
@@ -102,7 +108,7 @@ void cmd_delf(int client_fd) {
     _read(client_fd, msg, "Failed to read name and name length");
 
     // Get len(filename) and filename
-    uint16_t fname_len = 0; // uint32_t file_len = 0;
+    int fname_len = 0; // uint32_t file_len = 0;
     char fname[BUFSIZ];
     parse_message(msg, fname_len, fname);
 
@@ -164,14 +170,8 @@ void cmd_list(int client_fd) {
     sprintf(msg, "%d", buffer_size);
     _write(client_fd, msg, "Failed to send buffer size\n");
 
-    // @TODO: make this so it can send more than once
     _write(client_fd, buffer, "Failed to send buffer data\n");
 
-    // while (true) {
-    //     if (buffer_size > BUFSIZ) {
-    //         _write(client_fd, )
-    //     }
-    // }
 }
 
 
@@ -179,7 +179,7 @@ void cmd_mdir(int client_fd) {
 	char msg_buffer[BUFSIZ];
     _read(client_fd, msg_buffer, "Failed to get file information\n");
 
-    uint16_t len = 0;
+    int len = 0;
     char dir_name[BUFSIZ];
 
     parse_message(msg_buffer, len, dir_name);
@@ -202,7 +202,7 @@ void cmd_rdir(int client_fd) {
     _read(client_fd, msg, "Failed to read name and name length");
 
     // Get len(filename) and filename
-    uint16_t dname_len = 0;
+    int dname_len = 0;
     char dname[BUFSIZ];
     parse_message(msg, dname_len, dname);
 
@@ -235,7 +235,7 @@ void cmd_cdir(int client_fd) {
     _read(client_fd, msg, "Failed to read name and name length");
 
     // Get len(dirname) and dirname
-    uint16_t dname_len = 0;
+    int dname_len = 0;
     char dname[BUFSIZ];
     parse_message(msg, dname_len, dname);
 

@@ -47,19 +47,20 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	struct timeval start, end;
 
 	gettimeofday(&start, NULL);
-	while (true) {
+	while (file_size > BUFSIZ) {
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
 		_read(socket_fd, msg_buffer, "Client failed to receive file data\n");
 		// write to file
 		fputs(msg_buffer, fp);
 		file_size -= BUFSIZ;
-		if (file_size < BUFSIZ) {
-			_read(socket_fd, msg_buffer, "Client failed to receive file data\n", file_size);
-			fputs(msg_buffer, fp);
-			break;
-		}
 	}
+	if (file_size > 0) {
+		bzero(msg_buffer, BUFSIZ);
+		_read(socket_fd, msg_buffer, "Client failed to receive file data\n", file_size);
+		fputs(msg_buffer, fp);
+	}
+
 	gettimeofday(&end, NULL);
 
 	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)
@@ -81,6 +82,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	char msg_buffer[BUFSIZ];
 	uint16_t file_length = file_name.length();
 	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
+	log("%s", msg_buffer);
 
 	// give server file name and size of name
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
@@ -97,10 +99,10 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	struct stat st;
 	stat(file_name.c_str(), &st);
 	int original_size = st.st_size;
-	uint32_t file_size = st.st_size;
+	int file_size = st.st_size;
 
 	// send server file size
-	sprintf(msg_buffer, "%u", file_size);
+	sprintf(msg_buffer, "%d", file_size);
 	_write(socket_fd, msg_buffer, "Client failed to send file size\n");
 
 	bzero(msg_buffer, BUFSIZ);
@@ -117,20 +119,23 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
 
-	while (true) {
-		// read from file
-		if (file_size > BUFSIZ) fread(msg_buffer, 1, BUFSIZ, fp);
-		else fread(msg_buffer, 1, file_size, fp);
-		// send part of file
-		_write(socket_fd, msg_buffer, "Client failed to send file data\n");
-		// to protect from seeking past EOF
-		if (file_size - BUFSIZ <= 0) break;
-		// move file pointer BUFSIZ bytes to read the next bits
-		fseek(fp, BUFSIZ, SEEK_CUR);
-		file_size -= BUFSIZ;
-		// clear buffer
-		bzero(msg_buffer, BUFSIZ);
-	}
+    while (file_size > BUFSIZ) {
+    	log("%d", BUFSIZ);
+        // clear buffer
+        bzero(msg_buffer, BUFSIZ);
+        // read from file
+        fread(msg_buffer, 1, BUFSIZ, fp);
+        file_size -= BUFSIZ;
+        // send part of file
+        _write(socket_fd, msg_buffer, "Client failed to send file data\n");
+    }
+    if (file_size > 0) {
+    	log("%d", file_size);
+        bzero(msg_buffer, BUFSIZ);
+        fread(msg_buffer, 1, file_size, fp);
+        _write(socket_fd, msg_buffer, "Client failed to send file data\n");
+    }
+
 	gettimeofday(&end, NULL);
 
 	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)

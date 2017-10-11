@@ -129,15 +129,16 @@ bool dispatch_command(const int client_fd, const char *msg) {
     // Handle unknown command
     } else write(client_fd, msg_unknown, strlen(msg_unknown));
 
+    fflush(stdout);
     return quit;
 }
 
-void parse_message(char* message, uint16_t &length, char* name) {
+void parse_message(char* message, int &length, char* name) {
     const char delim[2] = " ";
     char* token;
 
     token = strtok(message, delim);
-    length = ntohs(atoi(token));
+    length = atoi(token);
     strcpy(name, strtok(NULL, delim));
 }
 
