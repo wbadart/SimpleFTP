@@ -92,7 +92,6 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	// get the file size
 	struct stat st;
 	stat(file_name.c_str(), &st);
-	int original_size = st.st_size;
 	int file_size = st.st_size;
 
 	// send server file size
@@ -193,7 +192,6 @@ void cmd_list(int socket_fd) {
 
 	// convert the size of directory to int
 	int dir_size = atoi(msg_buffer);
-	log("%s", msg_buffer);
 	if (dir_size <= 0) {
 		error("Client received an invalid directory size\n");
 	}

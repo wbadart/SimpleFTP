@@ -39,7 +39,7 @@ void cmd_dwld(int client_fd) {
         sprintf(size_str, "%d", file_size);
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
-    int bytes, total = 0;
+    int bytes;
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
