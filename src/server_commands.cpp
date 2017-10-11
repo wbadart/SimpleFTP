@@ -43,18 +43,13 @@ void cmd_dwld(int client_fd) {
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
-        log("read: %d", bytes);
         if (bytes == 0) break;
         if (bytes < BUFSIZ) {
             bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
-            total += bytes;
-            log("total: %d", total);
             break;
         }
         // send part of file
         bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
-        total += bytes;
-        log("total: %d", total);
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
     }
@@ -81,13 +76,18 @@ void cmd_upld(int client_fd) {
     file_size = atoi(msg_buffer);
 
     FILE* fp;
-    fp = fopen(name, "w");
+    fp = fopen(name, "wb");
 
     int bytes;
 
     while (true) {
         bytes = _read(client_fd, msg_buffer, "Client failed to receive file data\n");
-        if (bytes < BUFSIZ) break;
+        log("%d", bytes);
+        if (bytes == 0) break;
+        if (bytes < BUFSIZ) {
+            fwrite(msg_buffer, bytes, 1, fp);
+            break;
+        }
         fwrite(msg_buffer, bytes, 1, fp);
         bzero(msg_buffer, BUFSIZ);      
     }

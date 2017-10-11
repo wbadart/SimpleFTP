@@ -108,7 +108,7 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	}
 
 	FILE* fp;
-	fp = fopen(file_name.c_str(), "r");
+	fp = fopen(file_name.c_str(), "rb");
 
 	struct timeval start, end;
 	int bytes = 1, total = 0;
@@ -116,15 +116,17 @@ void cmd_upld(int socket_fd, std::string file_name) {
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
-        total += bytes;
-        log("%d", bytes);
+        if (bytes == 0) break;
         if (bytes < BUFSIZ) {
-            _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            bytes = _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            total += bytes;
+            log("%d", total);
             break;
         }
         // send part of file
         bytes = _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
-        file_size -= bytes;
+        total += bytes;
+        log("%d", total);
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
     }
