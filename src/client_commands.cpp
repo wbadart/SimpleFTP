@@ -30,7 +30,7 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 
 	// convert the size of directory to int
 	int file_size = atoi(msg_buffer);
-	printf("%s\n", msg_buffer);
+
 	if (file_size == -1 || file_size == 0) {
 		printf("File does not exist on server\n");
 		return;
@@ -82,7 +82,6 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	char msg_buffer[BUFSIZ];
 	uint16_t file_length = file_name.length();
 	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
-	log("%s", msg_buffer);
 
 	// give server file name and size of name
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");

@@ -68,9 +68,7 @@ void cmd_upld(int client_fd) {
     int name_size = 0;
     int file_size = 0;
     char name[100];
-    log("%s", msg_buffer);
     parse_message(msg_buffer, name_size, name);
-    log("%d %s", name_size, name);
 
     _write(client_fd, "1", "Failed to send upload confirmation\n");
 
@@ -78,23 +76,19 @@ void cmd_upld(int client_fd) {
     _read(client_fd, msg_buffer, "Failed to get file size from client\n");
 
     file_size = atoi(msg_buffer);
-    log("%d", file_size);
 
     FILE* fp;
-    log("%s", name);
     fp = fopen(name, "w");
 
     while (file_size > BUFSIZ) {
         bzero(msg_buffer, BUFSIZ);
         _read(client_fd, msg_buffer, "Failed to get file data from client\n");
-        log("%d", strlen(msg_buffer));
         fputs(msg_buffer, fp);
         file_size -= BUFSIZ;
     }
     if (file_size > 0) {
         bzero(msg_buffer, BUFSIZ);
         _read(client_fd, msg_buffer, "Failed to get file data from client\n", file_size);
-        log("%d", strlen(msg_buffer));
         fputs(msg_buffer, fp);
     }
     bzero(msg_buffer, BUFSIZ);
