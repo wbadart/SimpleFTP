@@ -26,7 +26,6 @@ void cmd_dwld(int client_fd) {
     FILE* fp;
     log("%s", name);
     fp = fopen(name, "r");
-
     if (!fp) {
         printf("File doesnt exist\n");
         _write(client_fd, "-1", "Failed to send message about the file not existing\n");
@@ -39,15 +38,18 @@ void cmd_dwld(int client_fd) {
         sprintf(size_str, "%d", file_size);
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
+    int bytes, count = 0;
 
     while (file_size > BUFSIZ) {
+        log("%d", count++);
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
         // read from file
         fread(msg_buffer, 1, BUFSIZ, fp);
-        file_size -= BUFSIZ;
         // send part of file
-        _write(client_fd, msg_buffer, "Server failed to send file data\n");
+        bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n");
+        log("%d", bytes);
+        file_size -= bytes;
     }
     if (file_size > 0) {
         bzero(msg_buffer, BUFSIZ);

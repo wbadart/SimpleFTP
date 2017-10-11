@@ -12,7 +12,7 @@
 ##
 
 CXX       = g++
-CXX_FLAGS = -ggdb -Wall -O0 -std=gnu++11 -Wno-write-strings
+CXX_FLAGS = -ggdb -Wall -O0 -std=gnu++11 -Wno-write-strings -g
 LD        = g++
 LD_FLAGS  = -static-libstdc++
 

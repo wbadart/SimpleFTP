@@ -21,8 +21,8 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	char msg_buffer[BUFSIZ];
 	uint16_t file_length = file_name.length();
 	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
-
-	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
+	
+  _write(socket_fd, msg_buffer, "Client failed to send file name information\n");
 
 	bzero(msg_buffer, BUFSIZ);
 	// get server's response
@@ -45,15 +45,18 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 		error("Could not create specified file\n");
 
 	struct timeval start, end;
-
-	gettimeofday(&start, NULL);
+  int bytes, count = 0;
+	
+  gettimeofday(&start, NULL);
 	while (file_size > BUFSIZ) {
+    log("%d", count++);
 		// clear buffer
 		bzero(msg_buffer, BUFSIZ);
-		_read(socket_fd, msg_buffer, "Client failed to receive file data\n");
+		bytes = _read(socket_fd, msg_buffer, "Client failed to receive file data\n");
 		// write to file
 		fputs(msg_buffer, fp);
-		file_size -= BUFSIZ;
+		file_size -= bytes;
+    log("%d", bytes);
 	}
 	if (file_size > 0) {
 		bzero(msg_buffer, BUFSIZ);
