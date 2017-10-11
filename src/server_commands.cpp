@@ -25,7 +25,7 @@ void cmd_dwld(int client_fd) {
 
     FILE* fp;
     log("%s", name);
-    fp = fopen(name, "r");
+    fp = fopen(name, "rb");
 
     if (!fp) {
         printf("File doesnt exist\n");
@@ -39,18 +39,22 @@ void cmd_dwld(int client_fd) {
         sprintf(size_str, "%d", file_size);
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
-    int bytes;
+    int bytes, total = 0;
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
-        log("%d", bytes);
+        log("read: %d", bytes);
+        if (bytes == 0) break;
         if (bytes < BUFSIZ) {
-            _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            total += bytes;
+            log("total: %d", total);
             break;
         }
         // send part of file
         bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
-        file_size -= bytes;
+        total += bytes;
+        log("total: %d", total);
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
     }
@@ -84,7 +88,7 @@ void cmd_upld(int client_fd) {
     while (true) {
         bytes = _read(client_fd, msg_buffer, "Client failed to receive file data\n");
         if (bytes < BUFSIZ) break;
-        fputs(msg_buffer, fp);
+        fwrite(msg_buffer, bytes, 1, fp);
         bzero(msg_buffer, BUFSIZ);      
     }
 

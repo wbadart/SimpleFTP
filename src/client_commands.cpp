@@ -31,39 +31,39 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	// convert the size of directory to int
 	int file_size = atoi(msg_buffer);
 
-	if (file_size == -1 || file_size == 0) {
+	if (file_size <= 0) {
 		printf("File does not exist on server\n");
 		return;
 	}
 
-	int original_size = file_size;
-
 	FILE* fp;
-	fp = fopen(file_name.c_str(), "w");
+	fp = fopen(file_name.c_str(), "wb");
 
 	if (!fp) 
 		error("Could not create specified file\n");
 
 	struct timeval start, end;
-	int bytes;
+	int bytes, total = 0;
 
 	gettimeofday(&start, NULL);
 
 	while (true) {
 		bytes = _read(socket_fd, msg_buffer, "Client failed to receive file data\n");
+		fwrite(msg_buffer, bytes, 1, fp);
+		total += bytes;
+		// if its the last _read
 		if (bytes < BUFSIZ) break;
-		fputs(msg_buffer, fp);
 		bzero(msg_buffer, BUFSIZ);		
 	}
 
 	gettimeofday(&end, NULL);
 
-	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)
-		  - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0;
-	float mbps = original_size / time_elap / 1000000.0;
+	float temp = ((end.tv_sec * 1000000 + end.tv_usec) - 
+		(start.tv_sec * 1000000 + start.tv_usec));
+	float mbps = ((float)total) / temp;
 
-	printf("%d bytes transferred in %7.5f seconds: %8.5f Megabytes/s\n", 
-		original_size, time_elap, mbps);
+	printf("%d bytes transferred in %9.6f seconds: %9.6f Megabytes/s\n", 
+		total, temp / 1000000.0, mbps);
 
 	fclose(fp);
 }
@@ -111,11 +111,12 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	fp = fopen(file_name.c_str(), "r");
 
 	struct timeval start, end;
-	int bytes = 1;
+	int bytes = 1, total = 0;
 	gettimeofday(&start, NULL);
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
+        total += bytes;
         log("%d", bytes);
         if (bytes < BUFSIZ) {
             _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
@@ -130,12 +131,12 @@ void cmd_upld(int socket_fd, std::string file_name) {
 
 	gettimeofday(&end, NULL);
 
-	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)
-		  - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0;
-	float mbps = original_size / time_elap / 1000000.0;
+	float temp = ((end.tv_sec * 1000000 + end.tv_usec) - 
+		(start.tv_sec * 1000000 + start.tv_usec));
+	float mbps = ((float)total) / temp;
 
-	printf("%d bytes transferred in %7.5f seconds: %8.5f Megabytes/s\n", 
-		original_size, time_elap, mbps);
+	printf("%d bytes transferred in %9.6f seconds: %9.6f Megabytes/s\n", 
+		total, temp / 1000000.0, mbps);
 
 	fclose(fp);
 }
