@@ -203,19 +203,16 @@ void cmd_rdir(int client_fd) {
     // Check confirmation
     bzero(msg, sizeof(msg));
     _read(client_fd, msg, "Couln't receive confirmation");
-    if(streq(msg, "No") || streq(msg, "no")) {
+    if(streq(msg, "No\n") || streq(msg, "no")) {
         log("RDIR abandoned by user");
         return;
+    } else {
+        // Perform deletion
+        log("Deleting '%s'", dname);
+        if(remove(dname) == 0)
+            _write(client_fd, "1", "Couln't report RDIR success");
+        else _write(client_fd, "-1", "Coun't report RDIR fail");
     }
-
-    // Perform deletion
-    log("Deleting '%s'", dname);
-    if(remove(dname) == 0)
-        _write(client_fd, "Success", "Couln't report RDIR success");
-    else _write(
-        client_fd,
-        "Failed. Is the directory empty?",
-        "Coun't report RDIR fail");
 }
 
 
