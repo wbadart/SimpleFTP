@@ -45,23 +45,15 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 		error("Could not create specified file\n");
 
 	struct timeval start, end;
-  int bytes, count = 0;
-	
-  gettimeofday(&start, NULL);
-	while (file_size > BUFSIZ) {
-    log("%d", count++);
-		// clear buffer
-		bzero(msg_buffer, BUFSIZ);
+	int bytes;
+
+	gettimeofday(&start, NULL);
+
+	while (true) {
 		bytes = _read(socket_fd, msg_buffer, "Client failed to receive file data\n");
-		// write to file
+		if (bytes < BUFSIZ) break;
 		fputs(msg_buffer, fp);
-		file_size -= bytes;
-    log("%d", bytes);
-	}
-	if (file_size > 0) {
-		bzero(msg_buffer, BUFSIZ);
-		_read(socket_fd, msg_buffer, "Client failed to receive file data\n", file_size);
-		fputs(msg_buffer, fp);
+		bzero(msg_buffer, BUFSIZ);		
 	}
 
 	gettimeofday(&end, NULL);
@@ -119,23 +111,21 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	fp = fopen(file_name.c_str(), "r");
 
 	struct timeval start, end;
+	int bytes = 1;
 	gettimeofday(&start, NULL);
 
-    while (file_size > BUFSIZ) {
-    	log("%d", BUFSIZ);
+    while (true) {
+        bytes = fread(msg_buffer, 1, BUFSIZ, fp);
+        log("%d", bytes);
+        if (bytes < BUFSIZ) {
+            _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            break;
+        }
+        // send part of file
+        bytes = _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
+        file_size -= bytes;
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
-        // read from file
-        fread(msg_buffer, 1, BUFSIZ, fp);
-        file_size -= BUFSIZ;
-        // send part of file
-        _write(socket_fd, msg_buffer, "Client failed to send file data\n");
-    }
-    if (file_size > 0) {
-    	log("%d", file_size);
-        bzero(msg_buffer, BUFSIZ);
-        fread(msg_buffer, 1, file_size, fp);
-        _write(socket_fd, msg_buffer, "Client failed to send file data\n");
     }
 
 	gettimeofday(&end, NULL);

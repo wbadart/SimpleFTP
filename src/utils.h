@@ -50,10 +50,10 @@ const std::map<std::string, Command> CMD_LABELS = {
 
 // wrapper for write()
 int _write(int socket_fd, char* message, char* error_msg);
+int _write(int socket_fd, char* message, char* error_msg, int sz);
 
 // wrapper for read()
 int _read(int socket_fd, char* message, char* error_msg);
-
 int _read(int socket_fd, char* message, char* error_msg, int sz);
 
 // Report error and exit with status

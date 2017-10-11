@@ -38,25 +38,21 @@ void cmd_dwld(int client_fd) {
         sprintf(size_str, "%d", file_size);
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
-    int bytes, count = 0;
+    int bytes;
 
-    while (file_size > BUFSIZ) {
-        log("%d", count++);
+    while (true) {
+        bytes = fread(msg_buffer, 1, BUFSIZ, fp);
+        log("%d", bytes);
+        if (bytes < BUFSIZ) {
+            _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            break;
+        }
+        // send part of file
+        bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
+        file_size -= bytes;
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
-        // read from file
-        fread(msg_buffer, 1, BUFSIZ, fp);
-        // send part of file
-        bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n");
-        log("%d", bytes);
-        file_size -= bytes;
     }
-    if (file_size > 0) {
-        bzero(msg_buffer, BUFSIZ);
-        fread(msg_buffer, 1, file_size, fp);
-        _write(client_fd, msg_buffer, "Server failed to send file data\n");
-    }
-    bzero(msg_buffer, BUFSIZ);
 
     fclose(fp);
 }
@@ -82,18 +78,14 @@ void cmd_upld(int client_fd) {
     FILE* fp;
     fp = fopen(name, "w");
 
-    while (file_size > BUFSIZ) {
-        bzero(msg_buffer, BUFSIZ);
-        _read(client_fd, msg_buffer, "Failed to get file data from client\n");
+    int bytes;
+
+    while (true) {
+        bytes = _read(client_fd, msg_buffer, "Client failed to receive file data\n");
+        if (bytes < BUFSIZ) break;
         fputs(msg_buffer, fp);
-        file_size -= BUFSIZ;
+        bzero(msg_buffer, BUFSIZ);      
     }
-    if (file_size > 0) {
-        bzero(msg_buffer, BUFSIZ);
-        _read(client_fd, msg_buffer, "Failed to get file data from client\n", file_size);
-        fputs(msg_buffer, fp);
-    }
-    bzero(msg_buffer, BUFSIZ);
 
     fclose(fp);
 }
