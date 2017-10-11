@@ -21,6 +21,14 @@ int _write(int socket_fd, char* message, char error_msg[]) {
     return bytes;
 }
 
+int _write(int socket_fd, char* message, char error_msg[], int sz) {
+    int bytes = write(socket_fd, message, sz);
+    if (bytes == -1) {
+        error(error_msg);
+    }
+    return bytes;
+}
+
 // wrapper for read()
 int _read(int socket_fd, char* message, char error_msg[BUFSIZ]) {
     int bytes = read(socket_fd, message, BUFSIZ);
