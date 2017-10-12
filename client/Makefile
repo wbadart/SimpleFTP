@@ -17,16 +17,13 @@ LD        = g++
 LD_FLAGS  = -static-libstdc++
 
 
-all: client server
+all: client
 
-client: src/client.o src/client_utils.o src/utils.o src/client_commands.o
+client: client.o client_utils.o utils.o client_commands.o
 	$(LD) $(LD_FLAGS) $^ -o myftp
-
-server: src/server.o src/server_utils.o src/utils.o src/server_commands.o
-	$(LD) $(LD_FLAGS) $^ -o myftpd
 
 %.o: %.cpp
 	$(CXX) $(CXX_FLAGS) -c $^ -o $@
 
 clean:
-	rm -f ./myftp ./myftpd src/*.o
+	rm -f ./myftp *.o
