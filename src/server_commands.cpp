@@ -111,16 +111,18 @@ void cmd_delf(int client_fd) {
     // Check confirmation message
     bzero(msg, sizeof(msg));
     _read(client_fd, msg, "Couln't receive confirmation");
-    if(streq(msg, "No") || streq(msg, "no")) {
+    if(streq(msg, "No\n") || streq(msg, "no")) {
         log("DELF abandoned by user");
         return;
+    } else {
+       // Perform deletion
+        log("Deleting '%s'", fname);
+        if(remove(fname) == 0)
+            _write(client_fd, "1", "Couln't report DELF success");
+        else _write(client_fd, "-1", "Coun't report DELF fail");
+ 
     }
 
-    // Perform deletion
-    log("Deleting '%s'", fname);
-    if(remove(fname) == 0)
-        _write(client_fd, "Success", "Couln't report DELF success");
-    else _write(client_fd, "Failed", "Coun't report DELF fail");
 }
 
 

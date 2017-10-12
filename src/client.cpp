@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 				case Command::DELF:
 					// get name of file to be deleted
 					msg_ss >> name;
-					cmd_mdir(socket_fd, name);
+					cmd_delf(socket_fd, name);
 					bzero(dir_name, BUFSIZ);
 					break;
 

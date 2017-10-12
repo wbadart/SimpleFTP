@@ -147,7 +147,8 @@ void cmd_delf(int socket_fd, std::string file_name) {
 	_write(socket_fd, cmd, "Client failed to send initial message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) file_name.length(), file_name.c_str());
+    uint16_t file_length = file_name.length();
+	sprintf(msg_buffer, "%u %s", file_length, file_name.c_str());
 
 	_write(socket_fd, msg_buffer, "Client failed to send file name information\n");
 
@@ -162,20 +163,34 @@ void cmd_delf(int socket_fd, std::string file_name) {
 		return;
 	}
 	bzero(msg_buffer, BUFSIZ);
-
-	// ask user to confirm deletion
-	printf("Are you sure you want to delete this file? Yes/No: ");
+	
+    // ask user to confirm deletion
+	printf("Are you sure you want to delete this directory? Yes/No: ");
 	fgets(msg_buffer, BUFSIZ, stdin);
 
 	// if they respond yes, confirm deletion with server, if not cancel it
-	if (streq(msg_buffer, "Yes")) {
+	if (streq(msg_buffer, "Yes\n")) {
 		_write(socket_fd, msg_buffer, "Delete failed\n");
-	} else if (streq(msg_buffer, "No")) {
+
+        // clear buffer
+        bzero(msg_buffer, BUFSIZ);
+
+        // get server's response with regard to deletion
+        _read(socket_fd, msg_buffer, "Client failed to receive deletion information");
+
+        int del_resp = atoi(msg_buffer);
+        if( del_resp < 0){
+            printf("Failed to delete directory\n");
+        } else {
+            printf("Directory deleted\n");
+        }
+	} else if (streq(msg_buffer, "No\n")) {
 		printf("Delete abandoned by user!\n");
 		_write(socket_fd, msg_buffer, "Delete failed\n");
 	} else {
 		printf("Sorry I did not understand that :(\n");
 	}
+
 }
 
 void cmd_list(int socket_fd) {
@@ -298,7 +313,8 @@ void cmd_cdir(int socket_fd, std::string dir_name) {
 	_write(socket_fd, cmd, "Client failed to send message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) dir_name.length(), dir_name.c_str());
+    uint16_t file_length = dir_name.length();
+	sprintf(msg_buffer, "%u %s", file_length, dir_name.c_str());
 
 	// send message to server
 	_write(socket_fd, msg_buffer, "Client failed to send directory information\n");
