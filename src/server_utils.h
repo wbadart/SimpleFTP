@@ -29,8 +29,8 @@
 #define MAX_CONNECTIONS (1)
 
 // Pre-defined messages
-static const char *msg_goodbye = "Goodbye!\n";
-static const char *msg_unknown = "Unkown command\n";
+//static const char *msg_goodbye = "Goodbye!\n";
+//static const char *msg_unknown = "Unkown command\n";
 
 // Print the usage message and return status
 int usage(int status=EXIT_SUCCESS);

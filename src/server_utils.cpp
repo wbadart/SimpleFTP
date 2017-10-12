@@ -123,11 +123,15 @@ bool dispatch_command(const int client_fd, const char *msg) {
                 break;
             case Command::QUIT:
                 quit = true;
+                static const char *msg_goodbye = "Goodbye!\n";
                 write(client_fd, msg_goodbye, strlen(msg_goodbye));
                 break;
         }
     // Handle unknown command
-    } else write(client_fd, msg_unknown, strlen(msg_unknown));
+    } else {
+        static const char *msg_unknown = "Unknown command\n";
+        write(client_fd, msg_unknown, strlen(msg_unknown));
+    }
 
     fflush(stdout);
     return quit;

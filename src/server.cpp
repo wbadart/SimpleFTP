@@ -21,7 +21,8 @@ int main(int argc, char *argv[]) {
     log("Using port '%d'", PORT);
 
     // Get listening socket
-    struct sockaddr_in me; socklen_t len = sizeof(me);
+    struct sockaddr_in me; 
+    // struct socklen_t len = sizeof(me);
     int listen_sockfd = get_socket(PORT, me);
 
     while(true) {

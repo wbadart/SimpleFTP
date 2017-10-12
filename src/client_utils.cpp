@@ -23,7 +23,7 @@ int usage(int status) {
 // strips the end of line from a string
 std::string strip(char* msg) {
 	std::string s(msg);
-	int i = s.find('\n');
+	unsigned int i = s.find('\n');
 	if (i != std::string::npos) 
 		s.erase(i);
 	return s;
