@@ -11,10 +11,7 @@ A basic FTP client and server.
 
 ## Building
 
-To build the whole program, client and server, run `make`. The
-Makefile provides rules for building the client and the server
-individually via `make client` and `make server`.
-
+To build the client or server program, run `make` in client/ or server/.
 
 ## Running
 
@@ -36,3 +33,6 @@ usage: myftp HOST PORT
     HOST    Name of the remote host running myftpd
     PORT    Port on which myftpd is listening.
 ```
+
+To run a command:
+>>> CMD argument
