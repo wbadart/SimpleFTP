@@ -38,17 +38,20 @@ void cmd_dwld(int client_fd) {
         sprintf(size_str, "%d", file_size);
         _write(client_fd, size_str, "Failed to send message about the file existing\n");
     }
-    int bytes;
+    int bytes, count = 0;
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
         if (bytes == 0) break;
         if (bytes < BUFSIZ) {
             bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
-            break;
+            log("%d", ++count);
+            continue;
         }
+        log("%d %d", BUFSIZ, ++count);
         // send part of file
         bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
+        log("bytes: %d", bytes);
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
     }
@@ -77,8 +80,15 @@ void cmd_upld(int client_fd) {
     FILE* fp;
     fp = fopen(name, "wb");
 
-    int bytes;
+    int bytes, total = 0;
 
+    while (total < file_size) {
+        bytes = _read(client_fd, msg_buffer, "Client failed to receive file data\n");
+        total += bytes;
+        fwrite(msg_buffer, bytes, 1, fp);
+        bzero(msg_buffer, BUFSIZ);      
+    }
+    /*
     while (true) {
         bytes = _read(client_fd, msg_buffer, "Client failed to receive file data\n");
         if (bytes == 0) break;
@@ -89,6 +99,7 @@ void cmd_upld(int client_fd) {
         fwrite(msg_buffer, bytes, 1, fp);
         bzero(msg_buffer, BUFSIZ);      
     }
+    */
 
     fclose(fp);
 }

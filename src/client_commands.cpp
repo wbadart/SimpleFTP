@@ -47,16 +47,18 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 
 	gettimeofday(&start, NULL);
 
-	while (true) {
+  int n_reads = file_size / BUFSIZ;
+  if (file_size % BUFSIZ != 0 || n_reads == 0) n_reads++;
+
+  while (total < file_size) {
 		bytes = _read(socket_fd, msg_buffer, "Client failed to receive file data\n");
 		fwrite(msg_buffer, bytes, 1, fp);
 		total += bytes;
 		// if its the last _read
-		if (bytes < BUFSIZ) break;
 		bzero(msg_buffer, BUFSIZ);		
-	}
-
-	gettimeofday(&end, NULL);
+  }
+	
+  gettimeofday(&end, NULL);
 
 	float temp = ((end.tv_sec * 1000000 + end.tv_usec) - 
 		(start.tv_sec * 1000000 + start.tv_usec));
