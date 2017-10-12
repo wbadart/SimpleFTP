@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
 	bool quit = false;
 	while (!quit) {
 		printf("%s", prompt);
+		fflush(stdin);
 		fgets(msg_buffer, BUFSIZ, stdin);
 		// strip the end of line off of the command
 		msg = strip(msg_buffer);

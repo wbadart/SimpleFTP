@@ -25,7 +25,8 @@ void cmd_dwld(int client_fd) {
 
     FILE* fp;
     log("%s", name);
-    fp = fopen(name, "r");
+    fp = fopen(name, "rb");
+
     if (!fp) {
         printf("File doesnt exist\n");
         _write(client_fd, "-1", "Failed to send message about the file not existing\n");
@@ -42,14 +43,13 @@ void cmd_dwld(int client_fd) {
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
-        log("%d", bytes);
+        if (bytes == 0) break;
         if (bytes < BUFSIZ) {
-            _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
             break;
         }
         // send part of file
         bytes = _write(client_fd, msg_buffer, "Server failed to send file data\n", bytes);
-        file_size -= bytes;
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
     }
@@ -76,14 +76,18 @@ void cmd_upld(int client_fd) {
     file_size = atoi(msg_buffer);
 
     FILE* fp;
-    fp = fopen(name, "w");
+    fp = fopen(name, "wb");
 
     int bytes;
 
     while (true) {
         bytes = _read(client_fd, msg_buffer, "Client failed to receive file data\n");
-        if (bytes < BUFSIZ) break;
-        fputs(msg_buffer, fp);
+        if (bytes == 0) break;
+        if (bytes < BUFSIZ) {
+            fwrite(msg_buffer, bytes, 1, fp);
+            break;
+        }
+        fwrite(msg_buffer, bytes, 1, fp);
         bzero(msg_buffer, BUFSIZ);      
     }
 
@@ -202,19 +206,16 @@ void cmd_rdir(int client_fd) {
     // Check confirmation
     bzero(msg, sizeof(msg));
     _read(client_fd, msg, "Couln't receive confirmation");
-    if(streq(msg, "No") || streq(msg, "no")) {
+    if(streq(msg, "No\n") || streq(msg, "no")) {
         log("RDIR abandoned by user");
         return;
+    } else {
+        // Perform deletion
+        log("Deleting '%s'", dname);
+        if(remove(dname) == 0)
+            _write(client_fd, "1", "Couln't report RDIR success");
+        else _write(client_fd, "-1", "Coun't report RDIR fail");
     }
-
-    // Perform deletion
-    log("Deleting '%s'", dname);
-    if(remove(dname) == 0)
-        _write(client_fd, "Success", "Couln't report RDIR success");
-    else _write(
-        client_fd,
-        "Failed. Is the directory empty?",
-        "Coun't report RDIR fail");
 }
 
 

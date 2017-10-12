@@ -31,39 +31,39 @@ void cmd_dwld(int socket_fd, std::string file_name) {
 	// convert the size of directory to int
 	int file_size = atoi(msg_buffer);
 
-	if (file_size == -1 || file_size == 0) {
+	if (file_size <= 0) {
 		printf("File does not exist on server\n");
 		return;
 	}
 
-	int original_size = file_size;
-
 	FILE* fp;
-	fp = fopen(file_name.c_str(), "w");
+	fp = fopen(file_name.c_str(), "wb");
 
 	if (!fp) 
 		error("Could not create specified file\n");
 
 	struct timeval start, end;
-	int bytes;
+	int bytes, total = 0;
 
 	gettimeofday(&start, NULL);
 
 	while (true) {
 		bytes = _read(socket_fd, msg_buffer, "Client failed to receive file data\n");
+		fwrite(msg_buffer, bytes, 1, fp);
+		total += bytes;
+		// if its the last _read
 		if (bytes < BUFSIZ) break;
-		fputs(msg_buffer, fp);
 		bzero(msg_buffer, BUFSIZ);		
 	}
 
 	gettimeofday(&end, NULL);
 
-	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)
-		  - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0;
-	float mbps = original_size / time_elap / 1000000.0;
+	float temp = ((end.tv_sec * 1000000 + end.tv_usec) - 
+		(start.tv_sec * 1000000 + start.tv_usec));
+	float mbps = ((float)total) / temp;
 
-	printf("%d bytes transferred in %7.5f seconds: %8.5f Megabytes/s\n", 
-		original_size, time_elap, mbps);
+	printf("%d bytes transferred in %9.6f seconds: %9.6f Megabytes/s\n", 
+		total, temp / 1000000.0, mbps);
 
 	fclose(fp);
 }
@@ -92,7 +92,6 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	// get the file size
 	struct stat st;
 	stat(file_name.c_str(), &st);
-	int original_size = st.st_size;
 	int file_size = st.st_size;
 
 	// send server file size
@@ -108,34 +107,35 @@ void cmd_upld(int socket_fd, std::string file_name) {
 	}
 
 	FILE* fp;
-	fp = fopen(file_name.c_str(), "r");
+	fp = fopen(file_name.c_str(), "rb");
 
 	struct timeval start, end;
-	int bytes = 1;
+	int bytes = 1, total = 0;
 	gettimeofday(&start, NULL);
 
     while (true) {
         bytes = fread(msg_buffer, 1, BUFSIZ, fp);
-        log("%d", bytes);
+        if (bytes == 0) break;
         if (bytes < BUFSIZ) {
-            _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            bytes = _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
+            total += bytes;
             break;
         }
         // send part of file
         bytes = _write(socket_fd, msg_buffer, "Server failed to send file data\n", bytes);
-        file_size -= bytes;
+        total += bytes;
         // clear buffer
         bzero(msg_buffer, BUFSIZ);
     }
 
 	gettimeofday(&end, NULL);
 
-	float time_elap = ((end.tv_sec * 1000000 + end.tv_usec)
-		  - (start.tv_sec * 1000000 + start.tv_usec)) / 1000000.0;
-	float mbps = original_size / time_elap / 1000000.0;
+	float temp = ((end.tv_sec * 1000000 + end.tv_usec) - 
+		(start.tv_sec * 1000000 + start.tv_usec));
+	float mbps = ((float)total) / temp;
 
-	printf("%d bytes transferred in %7.5f seconds: %8.5f Megabytes/s\n", 
-		original_size, time_elap, mbps);
+	printf("%d bytes transferred in %9.6f seconds: %9.6f Megabytes/s\n", 
+		total, temp / 1000000.0, mbps);
 
 	fclose(fp);
 }
@@ -192,7 +192,6 @@ void cmd_list(int socket_fd) {
 
 	// convert the size of directory to int
 	int dir_size = atoi(msg_buffer);
-	log("%s", msg_buffer);
 	if (dir_size <= 0) {
 		error("Client received an invalid directory size\n");
 	}
@@ -242,7 +241,8 @@ void cmd_rdir(int socket_fd, std::string dir_name) {
 	_write(socket_fd, cmd, "Client failed to send message\n");
 
 	char msg_buffer[BUFSIZ];
-	sprintf(msg_buffer, "%hu %s", (short int) dir_name.length(), dir_name.c_str());
+    uint16_t file_length = dir_name.length();
+	sprintf(msg_buffer, "%u %s", file_length, dir_name.c_str());
 
 	// send message to server
 	_write(socket_fd, msg_buffer, "Client failed to directory name\n");
@@ -267,14 +267,28 @@ void cmd_rdir(int socket_fd, std::string dir_name) {
 	fgets(msg_buffer, BUFSIZ, stdin);
 
 	// if they respond yes, confirm deletion with server, if not cancel it
-	if (streq(msg_buffer, "Yes")) {
+	if (streq(msg_buffer, "Yes\n")) {
 		_write(socket_fd, msg_buffer, "Delete failed\n");
-	} else if (streq(msg_buffer, "No")) {
+
+        // clear buffer
+        bzero(msg_buffer, BUFSIZ);
+
+        // get server's response with regard to deletion
+        _read(socket_fd, msg_buffer, "Client failed to receive deletion information");
+
+        int del_resp = atoi(msg_buffer);
+        if( del_resp < 0){
+            printf("Failed to delete directory\n");
+        } else {
+            printf("Directory deleted\n");
+        }
+	} else if (streq(msg_buffer, "No\n")) {
 		printf("Delete abandoned by user!\n");
 		_write(socket_fd, msg_buffer, "Delete failed\n");
 	} else {
 		printf("Sorry I did not understand that :(\n");
 	}
+
 }
 
 void cmd_cdir(int socket_fd, std::string dir_name) {
