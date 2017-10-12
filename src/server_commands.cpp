@@ -24,7 +24,6 @@ void cmd_dwld(int client_fd) {
     parse_message(msg_buffer, name_size, name);
 
     FILE* fp;
-    log("%s", name);
     fp = fopen(name, "rb");
 
     if (!fp) {
